@@ -7,15 +7,16 @@ from datetime import datetime, timezone, timedelta
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e estabilidade absoluta do layout)
+# 2. CSS Avançado e Seguro (Garante visual escuro e corrige o recuo para os cards aparecerem)
 st.markdown("""
     <style>
-    .block-container { padding: 20px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
+    /* CORREÇÃO CRÍTICA: Aumentado para 80px para tirar os cards de trás do cabeçalho oculto */
+    .block-container { padding: 80px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
     /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
-        height: 40px !important;
+        height: 50px !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
@@ -84,7 +85,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. NOVO CABEÇALHO PROPRIETÁRIO SANTO HOUSE (100% Estável, customizado e integrado)
+# 3. CABEÇALHO PROPRIETÁRIO SANTO HOUSE (Posicionado corretamente fora da zona oculta)
 st.markdown("""
     <div class="market-header-container">
         <div class="market-card">
