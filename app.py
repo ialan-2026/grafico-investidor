@@ -5,7 +5,7 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 import streamlit.components.v1 as components
 
-# 1. Configurar página em modo super-largo (Inicia expandido para fácil configuração)
+# 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
 # 2. CSS Seguro (Torna o cabeçalho transparente para manter o botão de recolher ativo)
@@ -13,7 +13,7 @@ st.markdown("""
     <style>
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* CORREÇÃO DO BOTÃO LATERAL: Cabeçalho invisível no fundo, mas mantém botões ativos */
+    /* Cabeçalho invisível no fundo, mas mantém botões ativos para o menu lateral */
     header[data-testid="stHeader"] { 
         background-color: rgba(12, 15, 22, 0) !important; 
         border-bottom: none !important;
@@ -53,7 +53,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Otimizada (Apenas Dólar, IFIX e CDI/DI Futuro)
+# 3. Faixa Superior Otimizada (Modo ROLANTE ativado com Dólar, IFIX, IEE e FIXA11)
 ticker_html = """
 <div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
   <div class="tradingview-widget-container__widget"></div>
@@ -62,9 +62,14 @@ ticker_html = """
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IFIX", "title": "FUNDOS IMOBILIÁRIOS (IFIX)"},
-    {"proName": "BMFBOVESPA:DI1!", "title": "TAXA CDI (DI FUTURO)"}
+    {"proName": "BMFBOVESPA:IEE", "title": "ÍNDICE ENERGIA (IEE)"},
+    {"proName": "BMFBOVESPA:FIXA11", "title": "RENDA FIXA / CDI"}
   ],
-  "showSymbolLogo": true, "colorTheme": "dark", "isTransparent": true, "displayMode": "adaptive", "locale": "br"
+  "showSymbolLogo": true, 
+  "colorTheme": "dark", 
+  "isTransparent": true, 
+  "displayMode": "regular", 
+  "locale": "br"
 }
   </script>
 </div>
@@ -75,7 +80,7 @@ components.html(ticker_html, height=52)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SOLAR WEALTH TERMINAL v3.3 // BENCHMARK COMPARATIVE FEED</div>
+        <div>❖ SOLAR WEALTH TERMINAL v3.4 // BENCHMARK COMPARATIVE FEED</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
