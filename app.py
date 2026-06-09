@@ -8,12 +8,13 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
+# 2. CSS Avançado e Seguro (Garante visual escuro e evita sobreposição do cabeçalho)
 st.markdown("""
     <style>
+    /* CORREÇÃO DO CABEÇALHO: Adicionado padding-top de 50px para empurrar o app para baixo do menu fixo */
     .block-container { padding: 50px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
+    /* Força o cabeçalho nativo a ficar alinhado ao fundo sem cobrir os gráficos */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
         height: 50px !important;
@@ -52,7 +53,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Otimizada (Substituição da CPFL pela NextEra Energy - Líder Global Solar)
+# 3. Faixa Superior (Letreiro Rolante Ativo - Adicionado mais ativos para forçar a rotação)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -70,12 +71,13 @@ ticker_html = """
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
     {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELETROBRAS)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"}
+    {"proName": "AMEX:TAN", "title": "SOLAR ETF (TAN)"},
+    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"},
+    {"proName": "BMFBOVESPA:IFIX", "title": "FUNDS IMOBILIÁRIOS (IFIX)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
-  "isTransparent": true,
+  "isTransparent": true, 
   "displayMode": "regular",
   "locale": "br"
 }
@@ -90,14 +92,19 @@ components.html(ticker_html, height=48)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SOLAR WEALTH TERMINAL v3.5 // LIVE BENCHMARK ROTATION SYSTEM</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.6 // LIVE BENCHMARK ROTATION SYSTEM</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
 """, unsafe_allow_html=True)
 
-# 4. Painel Lateral (Configuração limpa)
-st.sidebar.markdown("<h3 style='color:#3b82f6;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
+# 4. Painel Lateral (Configuração com Carregamento de Logo Corporativa)
+try:
+    st.sidebar.image("logo.jpg", use_container_width=True)
+except:
+    st.sidebar.markdown("<div style='text-align:center; color:#ff4b4b; font-size:0.8rem; margin-bottom:10px;'>⚠️ Faça upload do arquivo logo.jpg no GitHub</div>", unsafe_allow_html=True)
+
+st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:-10px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=300000, step=50000)
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=7000, step=500)
