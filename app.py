@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Avançada (Flexbox de blocos individuais - Sem risco de duplicação)
+# 3. Faixa Superior Avançada (Flexbox de caixas nativas reais TradingView - 100% Funcional)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -80,19 +80,28 @@ ticker_html = """
 <body>
 <div class="ticker-container">
     <div class="ticker-box">
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-        {"symbol": "FX_IDC:USDBRL", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-        </script>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+            {"symbol": "FX_IDC:USDBRL", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+            </script>
+        </div>
     </div>
     <div class="ticker-box">
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-        {"symbol": "AMEX:TAN", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-        </script>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+            {"symbol": "AMEX:TAN", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+            </script>
+        </div>
     </div>
     <div class="ticker-box">
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-        {"symbol": "NYSE:NEE", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-        </script>
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+            {"symbol": "NYSE:NEE", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+            </script>
+        </div>
     </div>
 </div>
 </body>
