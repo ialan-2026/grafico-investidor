@@ -122,10 +122,10 @@ except:
 
 st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 
-# ATUALIZADO: Inclusão do Perfil Sem Expansão solicitado
+# Ajustado: Mantendo a lista de perfis limpa e profissional
 perfil = st.sidebar.selectbox(
     "Perfil do Investidor", 
-    ["Conservador Escalável", "Agressivo Bimestral", "Apenas 1 Usina (Sem Expansão)", "Customizado"]
+    ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
@@ -142,18 +142,21 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento reativo do ritmo de expansão patrimonial
+# Mapeamento inteligente com a nova Chave de Seleção (Toggle)
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
 elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
-elif "Apenas 1 Usina" in perfil:
-    meses_para_nova_usina = 999  # Trava de segurança para impedir loops secundários
-    expandir_usinas = False
 else:
     st.sidebar.markdown("---")
-    meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
+    # AJUSTE FINO: Criação da chave liga/desliga reativa
+    ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
+    if activar_expansao:
+        meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
+    else:
+        expandir_usinas = False
+        meses_para_nova_usina = 999  # Isolador de segurança para o loop
 
 # 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA
 data = []
@@ -165,7 +168,7 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansão controlado pelo perfil selecionado
+    # Gatilho condicional de expansão controlado pela Chave de Seleção
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
         id_usina_atual += 1
