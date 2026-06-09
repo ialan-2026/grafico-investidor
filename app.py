@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Otimizada (Uso de ADRs Globais para evitar bloqueios da B3 e forçar a rolagem)
+# 3. Faixa Superior Otimizada (Substituição da CPFL pela NextEra Energy - Líder Global Solar)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -70,9 +70,8 @@ ticker_html = """
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
     {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELETROBRAS)"},
-    {"proName": "NYSE:CPFE", "title": "SETOR ELÉTRICO (CPFL)"},
     {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
-    {"proName": "NYSE:VNQ", "title": "FUNDOS IMOBILIÁRIOS (REITs)"}
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
