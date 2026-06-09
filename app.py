@@ -8,16 +8,16 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Seguro (Torna o cabeçalho transparente para manter o botão de recolher ativo)
+# 2. CSS Seguro (Mescla o cabeçalho nativo ao fundo sem desativar a seta do menu lateral)
 st.markdown("""
     <style>
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Cabeçalho invisível no fundo, mas mantém botões ativos para o menu lateral */
+    /* CORREÇÃO DO MENU: Blenda o cabeçalho ao fundo mas mantém os botões nativos ativos */
     header[data-testid="stHeader"] { 
-        background-color: rgba(12, 15, 22, 0) !important; 
+        background-color: #0c0f16 !important; 
+        box-shadow: none !important;
         border-bottom: none !important;
-        height: 40px !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
@@ -53,7 +53,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Otimizada (Modo ROLANTE ativado com Dólar, IFIX, IEE e FIXA11)
+# 3. Faixa Superior Corrigida (Letreiro Rolante Ativo e Sem Erros de Ativos)
 ticker_html = """
 <div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
   <div class="tradingview-widget-container__widget"></div>
@@ -62,13 +62,13 @@ ticker_html = """
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IFIX", "title": "FUNDOS IMOBILIÁRIOS (IFIX)"},
-    {"proName": "BMFBOVESPA:IEE", "title": "ÍNDICE ENERGIA (IEE)"},
+    {"proName": "BMFBOVESPA:ELET3", "title": "ENERGIA ELÉTRICA (ELET3)"},
+    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
     {"proName": "BMFBOVESPA:FIXA11", "title": "RENDA FIXA / CDI"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "regular", 
   "locale": "br"
 }
   </script>
@@ -80,7 +80,7 @@ components.html(ticker_html, height=52)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SOLAR WEALTH TERMINAL v3.4 // BENCHMARK COMPARATIVE FEED</div>
+        <div>❖ SOLAR WEALTH TERMINAL v3.5 // LIVE BENCHMARK ROTATION SYSTEM</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
