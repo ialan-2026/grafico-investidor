@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.9 // MULTI-SCENARIO ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.0 // ASSET INFLATION ENGINE</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -128,12 +128,13 @@ perfil = st.sidebar.selectbox(
 )
 
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
-faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=6000, step=500)
+faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Inicial por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
-
-# AJUSTADO: Slider agora estendido para até 300 meses (25 anos completos)
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 300, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
+
+# Alinhamento da nova taxa informada na equação do loop
+taxa_admin_pct = st.sidebar.slider("Taxa de O&M / Adm Santo House (%)", 0, 20, 0, step=1) / 100.0
 
 # Seletor de Estratégia Reativa
 st.sidebar.markdown("---")
@@ -154,7 +155,7 @@ elif "Agressivo" in perfil:
 else:
     st.sidebar.markdown("---")
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
-    if ativar_expansao:
+    if activar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
         max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
     else:
@@ -162,17 +163,22 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA COM DIRECIONAMENTO DE CONTRATOS
+# 5. NOVO MOTOR DE CÁLCULO CORE COM REAJUSTE DE INFLAÇÃO TARIFÁRIA (IPCA)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
+faturamento_dinamico_usina = faturamento_por_usina
 financiamentos = {}
 id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansão controlado pela frequência e trava de quantidade máxima (até 60 meses)
+    # GATILHO DE INFLAÇÃO: A cada 12 meses, a tarifa de energia sobe 5% (Média do IPCA)
+    if m > 1 and (m - 1) % 12 == 0:
+        faturamento_dinamico_usina *= 1.05
+
+    # Gatilho condicional de expansão patrimonial (Até o limite de 5 anos / 60 meses)
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -183,7 +189,7 @@ for m in range(1, months_projection + 1):
                 "meses_sem_pagar": 0
             }
 
-    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL
+    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL (FLEXÍVEL)
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
@@ -205,8 +211,11 @@ for m in range(1, months_projection + 1):
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
-    faturamento_bruto = usinas_ativas * faturamento_por_usina
-    lucro_liquido_empresa = faturamento_bruto - custo_parcelas_no_mes
+    # EXECUÇÃO DA MATEMÁTICA CONTRATUAL COM INFLAÇÃO E TAXA DE ADM
+    faturamento_bruto = usinas_ativas * faturamento_dinamico_usina
+    faturamento_santo_house = faturamento_bruto * taxa_admin_pct
+    faturamento_liquido_holding = faturamento_bruto - faturamento_santo_house
+    lucro_liquido_empresa = faturamento_liquido_holding - custo_parcelas_no_mes
     
     saque_investidor = lucro_liquido_empresa * pct_retirada
     retencao_caixa = lucro_liquido_empresa - saque_investidor
@@ -238,6 +247,12 @@ for m in range(1, months_projection + 1):
 
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
+
+# --- 6. CÁLCULO DE ROI DO PAINEL 3 CORRIGIDO (JUROS COMPOSTOS DE LONGO PRAZO) ---
+anos_totais = months_projection / 12.0
+taxa_cdi_anual = 0.095
+retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
+retorno_imovel_final = aporte_inicial * ((1 + 0.08) ** anos_totais)
 
 # Configuração Padrão de Design Gráfico (Estilo TradingView)
 layout_charts = dict(
@@ -275,10 +290,7 @@ with row2_col1:
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Patrimônio Usinas"], name="Patrimônio Real", line=dict(color="#10B981", width=3), fill='tozeroy', fillcolor='rgba(16, 185, 129, 0.03)'))
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
-    
-    # AJUSTADO: Nova linha proprietária de Valorização Absoluta da Holding solicitada
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Valor Total Negócio"], name="Valor da Holding", line=dict(color="#FF9F43", width=3)))
-    
     fig1.update_layout(**layout_charts, height=260)
     st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
@@ -293,17 +305,15 @@ with row2_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 3: DESTRUIÇÃO DE CONCORRÊNCIA E INSIGHTS ---
+# --- LINHA 3: COMPARATIVO EM JUROS COMPOSTOS E INSIGHTS ---
 row3_col1, row3_col2 = st.columns([1.2, 1])
 
 with row3_col1:
     st.markdown('<div class="panel-title-bar">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>', unsafe_allow_html=True)
-    anos = months_projection / 12.0
-    retorno_cdi = aporte_inicial * ((1 + 0.105) ** anos)
-    retorno_imovel = aporte_inicial + (aporte_inicial * 0.05 * anos)
     
+    # Plotagem atualizada com as variáveis de juros compostos reais de mercado
     fig3 = go.Figure(go.Bar(
-        x=[retorno_solar_total, retorno_cdi, retorno_imovel],
+        x=[retorno_solar_total, retorno_cdi_final, retorno_imovel_final],
         y=["Império Solar", "Renda Fixa (CDI)", "Imóvel Físico"],
         orientation='h',
         marker_color=['#10B981', '#334155', '#1e293b']
@@ -319,7 +329,7 @@ with row3_col1:
 
 with row3_col2:
     st.markdown('<div class="panel-title-bar">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>', unsafe_allow_html=True)
-    multiplicador = retorno_solar_total / (retorno_cdi if retorno_cdi > 0 else 1)
+    multiplicador = retorno_solar_total / (retorno_cdi_final if retorno_cdi_final > 0 else 1)
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 0 0 4px 4px; padding: 20px; height: 160px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
             Ao adotar a estratégia selecionada, o capital injetado se multiplica de forma geométrica através do efeito cascata. 
