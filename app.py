@@ -122,7 +122,7 @@ except:
 
 st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
-aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=50000)
+aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
@@ -145,7 +145,7 @@ else:
     st.sidebar.markdown("---")
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
-# 5. MOTOR DE CÁLCULO ATUALIZADO E FLEXÍVEL
+# 5. MOTOR DE CÁLCULO ATUALIZADO E CONECTADO AO APORTE INICIAL
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -170,7 +170,6 @@ for m in range(1, months_projection + 1):
     # SELEÇÃO DA ESTRATÉGIA DE ALOCAÇÃO DO CAIXA DO MENU LATERAL
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
-            # CORREÇÃO CRÍTICA: Se a usina tem pelo menos 12 parcelas a vencer, ela pode sofrer abatimento a qualquer momento
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
                 custo_12_parcelas_antecipadas = 12 * (custo_parcela_banco * 0.85)
                 
@@ -178,15 +177,15 @@ for m in range(1, months_projection + 1):
                     caixa_acumulado -= custo_12_parcelas_antecipadas
                     financiamentos[id_u]["primeiras_12_pagas"] = True
                     financiamentos[id_u]["parcelas_restantes"] -= 12
-                    financiamentos[id_u]["meses_sem_pagar"] = 12 # Isenção de parcelas por 12 meses garantida
-                    break # Executa um lote de amortização por mês para resguardar a saúde financeira
+                    financiamentos[id_u]["meses_sem_pagar"] = 12 
+                    break 
 
     # Cálculo dinâmico do custo de boletos ativos que restaram para este mês específico
     custo_parcelas_no_mes = 0
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["parcelas_restantes"] > 0:
             if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
-                custo_parcelas_no_mes += 0 # Custos liquidados antecipadamente
+                custo_parcelas_no_mes += 0 
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
@@ -203,12 +202,12 @@ for m in range(1, months_projection + 1):
     # Atualização dos cronogramas de tempo para o próximo mês do loop
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
-            financiamentos[id_u]["meses_sem_pagar"] -= 1 # Consome o lote antecipado
+            financiamentos[id_u]["meses_sem_pagar"] -= 1 
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
-            financiamentos[id_u]["parcelas_restantes"] -= 1 # Consome o contrato padrão a partir do mês 13
+            financiamentos[id_u]["parcelas_restantes"] -= 1 
 
-    # Variáveis de saída patrimoniais
-    patrimonio_ativos = usinas_ativas * 300000
+    # CORREÇÃO: Vinculação direta ao valor do Aporte Inicial dinâmico inserido pelo usuário
+    patrimonio_ativos = usinas_ativas * aporte_inicial
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
     data.append({
@@ -302,7 +301,7 @@ with row3_col1:
 
 with row3_col2:
     st.markdown('<div class="panel-title-bar">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>', unsafe_allow_html=True)
-    multiplicador = retorno_solar_total / retorno_cdi
+    multiplicador = retorno_solar_total / (retorno_cdi if retorno_cdi > 0 else 1)
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 0 0 4px 4px; padding: 20px; height: 160px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
             Ao adotar a estratégia selecionada, o capital injetado se multiplica de forma geométrica através do efeito cascata. 
