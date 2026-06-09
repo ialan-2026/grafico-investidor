@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.8 // DYNAMIC CAPITAL ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.9 // MULTI-SCENARIO ENGINE</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -121,7 +121,13 @@ except:
     st.sidebar.markdown("<div style='text-align:center; color:#ff4b4b; font-size:0.8rem; margin-bottom:10px;'>⚠️ Faça upload do arquivo logo.jpg no GitHub</div>", unsafe_allow_html=True)
 
 st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
-perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
+
+# ATUALIZADO: Inclusão do Perfil Sem Expansão solicitado
+perfil = st.sidebar.selectbox(
+    "Perfil do Investidor", 
+    ["Conservador Escalável", "Agressivo Bimestral", "Apenas 1 Usina (Sem Expansão)", "Customizado"]
+)
+
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
@@ -136,29 +142,31 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento do ritmo com base na variável 'perfil' da sidebar
+# Mapeamento reativo do ritmo de expansão patrimonial
+expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
 elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
+elif "Apenas 1 Usina" in perfil:
+    meses_para_nova_usina = 999  # Trava de segurança para impedir loops secundários
+    expandir_usinas = False
 else:
     st.sidebar.markdown("---")
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
-# 5. MOTOR DE CÁLCULO ATUALIZADO E CONECTADO AO APORTE INICIAL
+# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
-
-# Rastreamento dinâmico do passivo bancário
 financiamentos = {}
 id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Ativação de novas usinas escaladas (Até o limite de 5 anos / 60 meses)
-    if m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
+    # Gatilho condicional de expansão controlado pelo perfil selecionado
+    if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
         id_usina_atual += 1
         financiamentos[id_usina_atual] = {
@@ -167,7 +175,7 @@ for m in range(1, months_projection + 1):
             "meses_sem_pagar": 0
         }
 
-    # SELEÇÃO DA ESTRATÉGIA DE ALOCAÇÃO DO CAIXA DO MENU LATERAL
+    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
@@ -180,7 +188,7 @@ for m in range(1, months_projection + 1):
                     financiamentos[id_u]["meses_sem_pagar"] = 12 
                     break 
 
-    # Cálculo dinâmico do custo de boletos ativos que restaram para este mês específico
+    # Varredura do custo real de boletos bancários ativos no mês
     custo_parcelas_no_mes = 0
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["parcelas_restantes"] > 0:
@@ -189,7 +197,6 @@ for m in range(1, months_projection + 1):
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
-    # Consolidação do Fluxo de Caixa da holding
     faturamento_bruto = usinas_ativas * faturamento_por_usina
     lucro_liquido_empresa = faturamento_bruto - custo_parcelas_no_mes
     
@@ -199,14 +206,13 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # Atualização dos cronogramas de tempo para o próximo mês do loop
+    # Consumo do tempo de carência e dos contratos paralelos
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
             financiamentos[id_u]["meses_sem_pagar"] -= 1 
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
             financiamentos[id_u]["parcelas_restantes"] -= 1 
 
-    # CORREÇÃO: Vinculação direta ao valor do Aporte Inicial dinâmico inserido pelo usuário
     patrimonio_ativos = usinas_ativas * aporte_inicial
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
