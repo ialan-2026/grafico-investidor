@@ -8,16 +8,14 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Seguro (Mescla o cabeçalho nativo ao fundo sem desativar a seta do menu lateral)
+# 2. CSS Avançado e Seguro (Garante visual escuro e botões da barra lateral ativos)
 st.markdown("""
     <style>
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* CORREÇÃO DO MENU: Blenda o cabeçalho ao fundo mas mantém os botões nativos ativos */
+    /* Mantém o cabeçalho nativo visível para a seta funcionar, mas com a cor de fundo idêntica */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
-        box-shadow: none !important;
-        border-bottom: none !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
@@ -53,7 +51,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Corrigida (Letreiro Rolante Ativo e Sem Erros de Ativos)
+# 3. Faixa Superior Ultra-Estável (Apenas os ativos homologados e funcionais)
 ticker_html = """
 <div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
   <div class="tradingview-widget-container__widget"></div>
@@ -61,14 +59,14 @@ ticker_html = """
   {
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "BMFBOVESPA:IFIX", "title": "FUNDOS IMOBILIÁRIOS (IFIX)"},
-    {"proName": "BMFBOVESPA:ELET3", "title": "ENERGIA ELÉTRICA (ELET3)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
-    {"proName": "BMFBOVESPA:FIXA11", "title": "RENDA FIXA / CDI"}
+    {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
+    {"proName": "BMFBOVESPA:ELET3", "title": "ENERGIA (ELET3)"},
+    {"proName": "AMEX:TAN", "title": "SOLAR ETF (TAN)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
+  "displayMode": "regular",
   "locale": "br"
 }
   </script>
