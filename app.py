@@ -8,15 +8,16 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
+# 2. CSS Avançado e Seguro (Garante visual escuro e evita sobreposição do cabeçalho)
 st.markdown("""
     <style>
-    .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
+    /* CORREÇÃO DO CABEÇALHO: Adicionado padding-top de 50px para empurrar o app para baixo do menu fixo */
+    .block-container { padding: 50px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
+    /* Força o cabeçalho nativo a ficar alinhado ao fundo sem cobrir os gráficos */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
-        height: 45px !important;
+        height: 50px !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
@@ -75,7 +76,7 @@ ticker_html = """
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "adaptive",
+  "displayMode": "regular",
   "locale": "br"
 }
   </script>
@@ -83,7 +84,6 @@ ticker_html = """
 </body>
 </html>
 """
-# Força o componente a respeitar a largura da tela com o uso seguro do iframe
 components.html(ticker_html, height=48)
 
 # --- BARRA DE COMANDO INTEGRADA ---
