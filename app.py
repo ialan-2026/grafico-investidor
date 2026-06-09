@@ -136,7 +136,16 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# 5. MOTOR DE CÁLCULO ATUALIZADO: QUITAÇÃO DAS 12 PRIMEIRAS PARCELAS
+# CORREÇÃO: Mapeamento dinâmico restaurado com slider condicional para o perfil "Customizado"
+if "Conservador" in perfil:
+    meses_para_nova_usina = 12
+elif "Agressivo" in perfil:
+    meses_para_nova_usina = 2
+else:
+    st.sidebar.markdown("---")
+    meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
+
+# 5. MOTOR DE CÁLCULO: QUITAÇÃO DAS 12 PRIMEIRAS PARCELAS
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -145,14 +154,6 @@ usinas_ativas = 1
 # Rastreamento dinâmico: {id_usina: {"parcelas_restantes": 60, "primeiras_12_pagas": False, "meses_sem_pagar": 0}}
 financiamentos = {}
 id_usina_atual = 1
-
-# Mapeamento do ritmo com base na sua variável 'perfil' da sidebar
-if "Conservador" in perfil:
-    meses_para_nova_usina = 12
-elif "Agressivo" in perfil:
-    meses_para_nova_usina = 2
-else:
-    meses_para_nova_usina = 1
 
 for m in range(1, months_projection + 1):
     
@@ -209,7 +210,7 @@ for m in range(1, months_projection + 1):
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
             financiamentos[id_u]["parcelas_restantes"] -= 1 # Consome o contrato padrão a partir do mês 13
 
-    # Preservando as mesmas chaves que alimentam suas tabelas e os 3 painéis
+    # Preservando as mesmas chaves que alimentam as tabelas e os 3 painéis
     patrimonio_ativos = usinas_ativas * 300000
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
