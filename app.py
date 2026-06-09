@@ -5,14 +5,20 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 import streamlit.components.v1 as components
 
-# 1. Configurar página em modo super-largo (Fullscreen)
+# 1. Configurar página em modo super-largo (Inicia expandido para fácil configuração)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Seguro (Apenas cores, fontes e efeitos neon - Sem quebrar o layout das colunas)
+# 2. CSS Seguro (Torna o cabeçalho transparente para manter o botão de recolher ativo)
 st.markdown("""
     <style>
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
-    header { visibility: hidden !important; } 
+    
+    /* CORREÇÃO DO BOTÃO LATERAL: Cabeçalho invisível no fundo, mas mantém botões ativos */
+    header[data-testid="stHeader"] { 
+        background-color: rgba(12, 15, 22, 0) !important; 
+        border-bottom: none !important;
+        height: 40px !important;
+    } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
     
@@ -47,17 +53,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Ticker de Ações do TradingView)
+# 3. Faixa Superior Otimizada (Apenas Dólar, IFIX e CDI/DI Futuro)
 ticker_html = """
 <div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
   <div class="tradingview-widget-container__widget"></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
   {
   "symbols": [
-    {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "BMFBOVESPA:IEE", "title": "ÍNDICE ENERGIA (B3)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL"}
+    {"proName": "BMFBOVESPA:IFIX", "title": "FUNDOS IMOBILIÁRIOS (IFIX)"},
+    {"proName": "BMFBOVESPA:DI1!", "title": "TAXA CDI (DI FUTURO)"}
   ],
   "showSymbolLogo": true, "colorTheme": "dark", "isTransparent": true, "displayMode": "adaptive", "locale": "br"
 }
@@ -70,13 +75,13 @@ components.html(ticker_html, height=52)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SOLAR WEALTH TERMINAL v3.2 // MAIN DATA FEED</div>
+        <div>❖ SOLAR WEALTH TERMINAL v3.3 // BENCHMARK COMPARATIVE FEED</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
 """, unsafe_allow_html=True)
 
-# 4. Painel Lateral (Configuração limpa e sem bugs de travamento)
+# 4. Painel Lateral (Configuração limpa)
 st.sidebar.markdown("<h3 style='color:#3b82f6;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=300000, step=50000)
@@ -85,7 +90,6 @@ custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-# Regra de exibição inteligente do filtro de meses solicitada por você
 if perfil == "Conservador Escalável":
     meses_para_nova_usina = 12
     st.sidebar.info("ℹ️ Frequência travada em 12 meses para o perfil Conservador.")
@@ -146,7 +150,6 @@ layout_charts = dict(
     margin=dict(l=45, r=15, t=15, b=25), hovermode='x unified'
 )
 
-# Função auxiliar para renderizar os cards de métricas de forma segura contra colapsos
 def render_metric_card(label, value, color_class):
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; padding: 15px; text-align: center;">
