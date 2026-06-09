@@ -52,68 +52,42 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Avançada (Flexbox de caixas nativas reais TradingView - 100% Funcional)
-ticker_html = """
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }
-        .ticker-container {
-            display: flex;
-            justify-content: space-between;
-            width: 100vw;
-            gap: 15px;
-            padding: 2px 15px;
-            box-sizing: border-box;
-        }
-        .ticker-box {
-            flex: 1;
-            height: 46px;
-            background-color: #131722;
-            border: 1px solid #2a2e39;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body>
-<div class="ticker-container">
-    <div class="ticker-box">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-            {"symbol": "FX_IDC:USDBRL", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-            </script>
-        </div>
+# Função auxiliar para gerar o HTML isolado de cada Ticker sem conflito de script
+def render_isolated_ticker(symbol):
+    return f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body {{ margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }}
+            .tradingview-widget-container {{ width: 100% !important; height: 46px !important; background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; }}
+        </style>
+    </head>
+    <body>
+    <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+        {{"symbol": "{symbol}", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}}
+        </script>
     </div>
-    <div class="ticker-box">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-            {"symbol": "AMEX:TAN", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-            </script>
-        </div>
-    </div>
-    <div class="ticker-box">
-        <div class="tradingview-widget-container">
-            <div class="tradingview-widget-container__widget"></div>
-            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-            {"symbol": "NYSE:NEE", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
-            </script>
-        </div>
-    </div>
-</div>
-</body>
-</html>
-"""
-components.html(ticker_html, height=52)
+    </body>
+    </html>
+    """
+
+# 3. Faixa Superior Avançada (Uso de Colunas Nativas do Streamlit - Isolamento Total)
+col_t1, col_t2, col_t3 = st.columns(3)
+with col_t1:
+    components.html(render_isolated_ticker("FX_IDC:USDBRL"), height=48)
+with col_t2:
+    components.html(render_isolated_ticker("AMEX:TAN"), height=48)
+with col_t3:
+    components.html(render_isolated_ticker("NYSE:NEE"), height=48)
 
 # --- BARRA DE COMANDO INTEGRADA ---
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.6 // BENCHMARK INDEX COMPONENT</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.7 // BENCHMARK INDEX COMPONENT</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
