@@ -2,12 +2,40 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.express as px
+from datetime import datetime, timezone, timedelta
+import streamlit.components.v1 as components
 
 # 1. Configuração da Página (Estilo Startup)
 st.set_page_config(page_title="Usina Solar | Dashboard Premium", layout="wide", initial_sidebar_state="expanded")
 
-# Custom CSS para deixar a interface mais "sexy" e moderna
+# --- WIDGET DA BOLSA DE VALORES (TRADINGVIEW) ---
+# Colocamos logo no topo para dar o impacto de plataforma financeira
+ticker_html = """
+<div class="tradingview-widget-container">
+  <div class="tradingview-widget-container__widget"></div>
+  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+  {
+  "symbols": [
+    {"proName": "IBOVESPA:IBOV", "title": "Ibovespa"},
+    {"description": "Dólar Comercial", "proName": "FX_IDC:USDBRL"},
+    {"description": "Bitcoin", "proName": "BINANCE:BTCUSDT"},
+    {"description": "Petrobras", "proName": "BMFBOVESPA:PETR4"},
+    {"description": "Vale", "proName": "BMFBOVESPA:VALE3"},
+    {"description": "S&P 500", "proName": "FOREXCOM:SPXUSD"},
+    {"description": "Índice de Energia", "proName": "BMFBOVESPA:IEE"}
+  ],
+  "showSymbolLogo": true,
+  "colorTheme": "dark",
+  "isTransparent": true,
+  "displayMode": "adaptive",
+  "locale": "br"
+}
+  </script>
+</div>
+"""
+components.html(ticker_html, height=50)
+
+# Custom CSS para deixar a interface ainda mais "sexy"
 st.markdown("""
     <style>
     .main {background-color: #0e1117;}
@@ -18,11 +46,28 @@ st.markdown("""
     }
     .insight-text {font-size: 1.2rem; color: #e5e5e5; font-style: italic;}
     .highlight {color: #2ca02c; font-weight: bold; font-size: 1.4rem;}
+    .top-header {display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 20px;}
+    .status-online {color: #00ff00; font-weight: bold; font-size: 0.9rem; animation: blinker 1.5s linear infinite;}
+    @keyframes blinker { 50% { opacity: 0; } }
     </style>
 """, unsafe_allow_html=True)
 
+# --- CABEÇALHO COM DATA, HORA E STATUS ---
+# Configurando fuso horário para Brasília (UTC-3)
+fuso_brasil = timezone(timedelta(hours=-3))
+agora = datetime.now(fuso_brasil)
+data_hora_formatada = agora.strftime("%d/%m/%Y • %H:%M:%S")
+
+st.markdown(f"""
+    <div class="top-header">
+        <div style="font-size: 0.9rem; color: #888;">📊 TERMINAL DE RENDIMENTO ENERGÉTICO | <b>{data_hora_formatada}</b></div>
+        <div class="status-online">● SISTEMA ONLINE E OPERACIONAL</div>
+    </div>
+""", unsafe_allow_html=True)
+
+# Título Principal
 st.title("☀️ Usina Solar: O Futuro do Rendimento Passivo")
-st.markdown("Uma visão interativa, transparente e previsível para o seu capital.")
+st.markdown("Uma visão interativa, transparente e previsível para o seu capital. Esqueça a volatilidade da bolsa; invista na certeza do sol.")
 
 # 2. Barra Lateral - Parâmetros
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/3565/3565609.png", width=80)
@@ -39,7 +84,7 @@ rentabilidade_mensal = (retorno_realista / investimento_inicial) * 100
 payback_meses = investimento_inicial / retorno_realista
 lucro_total = (retorno_realista * meses_totais) - investimento_inicial
 
-# 3. Criação de Abas (Navegação Moderna)
+# 3. Criação de Abas
 tab1, tab2, tab3, tab4 = st.tabs(["📊 Visão Geral do Investimento", "🚀 Alavancagem (Reinvestimento)", "📅 Histórico Mês a Mês", "🌐 Simulador 3D (Planta)"])
 
 with tab1:
@@ -52,7 +97,7 @@ with tab1:
     
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- FRASES DE IMPACTO (MARKETING) ---
+    # --- FRASES DE IMPACTO ---
     st.markdown("### 💡 Inteligência de Mercado")
     cdi_mensal = 0.85 # Estimativa CDI
     multiplicador_cdi = rentabilidade_mensal / cdi_mensal
@@ -60,7 +105,7 @@ with tab1:
     st.markdown(f"""
     <div class="insight-text">
         Enquanto o mercado tradicional (CDI/Tesouro) briga para entregar 0,85% ao mês, a sua usina atua como uma máquina de infraestrutura, entregando <span class="highlight">{rentabilidade_mensal:.2f}%</span>. <br>
-        Isso significa que o seu dinheiro está trabalhando <b>{multiplicador_cdi:.1f} vezes mais rápido</b> do que no banco. A cada R$ 1 investido hoje, o sol devolve R$ {((lucro_total+investimento_inicial)/investimento_inicial):.2f} em {anos_projecao} anos, com um ativo físico e palpável gerando energia.
+        Isso significa que o seu dinheiro está trabalhando <b>{multiplicador_cdi:.1f} vezes mais rápido</b> do que no banco. A cada R$ 1 investido hoje, o sol devolve R$ {((lucro_total+investimento_inicial)/investimento_inicial):.2f} em {anos_projecao} anos, imune às oscilações da bolsa.
     </div>
     """, unsafe_allow_html=True)
     
@@ -95,7 +140,6 @@ with tab2:
     st.markdown("E se você não sacar os rendimentos? E se você usar a própria receita da usina para comprar mais painéis e expandir sua capacidade mensalmente? Veja a diferença entre o **Crescimento Linear** e o **Crescimento Exponencial**.")
     
     taxa_decimal = rentabilidade_mensal / 100
-    # Cálculo de juros compostos: FV = P * (1 + r)^t
     caixa_composto = investimento_inicial * (1 + taxa_decimal)**meses_array
     
     fig_comp = go.Figure()
@@ -116,9 +160,7 @@ with tab3:
         "Aporte/Retorno": [f"R$ {-investimento_inicial:,.2f}" if i == 0 else f"R$ {retorno_realista:,.2f}" for i in meses_array],
         "Saldo Acumulado (R$)": caixa_realista
     })
-    # Formatação do Saldo para Reais
     df["Saldo Acumulado (R$)"] = df["Saldo Acumulado (R$)"].apply(lambda x: f"R$ {x:,.2f}".replace(",", "_").replace(".", ",").replace("_", "."))
-    
     st.dataframe(df, use_container_width=True, height=400)
 
 with tab4:
@@ -126,13 +168,11 @@ with tab4:
     st.markdown("### 🌐 Visualização da Planta (Digital Twin)")
     st.markdown("Visualize o seu ativo físico operando em tempo real no espaço digital.")
     
-    # Exemplo de iFrame de um modelo 3D (Substitua o src pelo seu modelo do Spline.design ou Sketchfab)
     html_3d = """
     <div style="width: 100%; height: 500px; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
         <iframe src="https://my.spline.design/solarpanel-0a1b2c3d4e5f/" frameborder="0" width="100%" height="100%" style="background-color: #1e1e1e;">
             <h3 style="color: white; text-align: center; margin-top: 20%;">Área reservada para Embed de Modelo 3D da Usina Solar</h3>
         </iframe>
     </div>
-    <p style="color: gray; font-size: 0.8rem; text-align: center;">*Para ativar o 3D interativo, crie um modelo gratuito no Spline.design e cole o link do iframe no código fonte.</p>
     """
     st.components.v1.html(html_3d, height=550)
