@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior 100% Homologada (Ativos estáveis que garantem o Auto Scroll sem travar)
+# 3. Faixa Superior (Ativos globais de dados abertos que garantem a rolagem infinita sem travar)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -68,12 +68,12 @@ ticker_html = """
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
   {
   "symbols": [
-    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "NYSE:EWZ", "title": "IBOVESPA (EWZ ETF)"},
-    {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELET3)"},
+    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL (USD/BRL)"},
     {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (SOLAR)"},
-    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"}
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"},
+    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC/USDT)"},
+    {"proName": "FX:EURUSD", "title": "EURO / DÓLAR (EUR/USD)"},
+    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL (GOLD)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
