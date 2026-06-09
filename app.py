@@ -122,7 +122,6 @@ except:
 
 st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 
-# Ajustado: Mantendo a lista de perfis limpa e profissional
 perfil = st.sidebar.selectbox(
     "Perfil do Investidor", 
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
@@ -142,7 +141,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento inteligente com a nova Chave de Seleção (Toggle)
+# Mapeamento do ritmo com a Chave de Seleção (Toggle) Corrigida
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
@@ -150,9 +149,9 @@ elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
 else:
     st.sidebar.markdown("---")
-    # AJUSTE FINO: Criação da chave liga/desliga reativa
+    # CORREÇÃO DA SINTAXE: Unificado o nome da variável sem a letra "c"
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
-    if activar_expansao:
+    if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
     else:
         expandir_usinas = False
