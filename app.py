@@ -141,23 +141,27 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento do ritmo com a Chave de Seleção (Toggle) Corrigida
+# AJUSTE FINO: Mapeamento reativo do ritmo e da QUANTIDADE TOTAL MÁXIMA de usinas
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
+    max_usinas = 999  # Preserva o comportamento original ilimitado dos perfis prontos
 elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
+    max_usinas = 999
 else:
     st.sidebar.markdown("---")
-    # CORREÇÃO DA SINTAXE: Unificado o nome da variável sem a letra "c"
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
     if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
+        # NOVO CONTROLE: Define o teto físico do parque de usinas da holding
+        max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
     else:
         expandir_usinas = False
-        meses_para_nova_usina = 999  # Isolador de segurança para o loop
+        meses_para_nova_usina = 999
+        max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA
+# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA COM DIRECIONAMENTO DE CONTRATOS
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -167,15 +171,17 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansão controlado pela Chave de Seleção
+    # Gatilho condicional de expansão controlado pela frequência E pela trava de quantidade máxima
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
-        usinas_ativas += 1
-        id_usina_atual += 1
-        financiamentos[id_usina_atual] = {
-            "parcelas_restantes": 60,
-            "primeiras_12_pagas": False,
-            "meses_sem_pagar": 0
-        }
+        # TRAVA AJUSTADA: Só adquire um novo ativo se ainda não bateu a meta estipulada pelo usuário
+        if usinas_ativas < max_usinas:
+            usinas_ativas += 1
+            id_usina_atual += 1
+            financiamentos[id_usina_atual] = {
+                "parcelas_restantes": 60,
+                "primeiras_12_pagas": False,
+                "meses_sem_pagar": 0
+            }
 
     # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
