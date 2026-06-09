@@ -205,7 +205,7 @@ for m in range(1, months_projection + 1):
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
-    # AJUSTADO: Faturamento fixo por usina (Ciclo Fechado comercial estável)
+    # Faturamento fixo por usina (Ciclo Fechado comercial estável)
     faturamento_bruto = usinas_ativas * faturamento_por_usina
     faturamento_santo_house = faturamento_bruto * taxa_admin_pct
     faturamento_liquido_holding = faturamento_bruto - faturamento_santo_house
@@ -224,7 +224,8 @@ for m in range(1, months_projection + 1):
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
             financiamentos[id_u]["parcelas_restantes"] -= 1 
 
-    patrimonio_ativos = usinas_ativas *豪 porte_inicial if 'porte_inicial' in locals() else usinas_ativas * aporte_inicial
+    # CORREÇÃO CRÍTICA: Removido o caractere '豪' e simplificada a equação matemática reativa
+    patrimonio_ativos = usinas_ativas * aporte_inicial
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
     data.append({
