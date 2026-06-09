@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Ativos globais de dados abertos que garantem a rolagem infinita sem travar)
+# 3. Faixa Superior (Letreiro com códigos atualizados em modo REGULAR para Auto Scroll Infinito)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -68,12 +68,14 @@ ticker_html = """
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
   {
   "symbols": [
-    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL (USD/BRL)"},
+    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"},
-    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC/USDT)"},
-    {"proName": "FX:EURUSD", "title": "EURO / DÓLAR (EUR/USD)"},
-    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL (GOLD)"}
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
+    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"},
+    {"proName": "BINANCE:ETHUSDT", "title": "ETHEREUM (ETH)"},
+    {"proName": "NASDAQ:TSLA", "title": "TESLA ENERGY (TSLA)"},
+    {"proName": "FX:EURUSD", "title": "EURO / DÓLAR"},
+    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
