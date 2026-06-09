@@ -131,7 +131,6 @@ aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=24
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Inicial por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 
-# 🔥 AJUSTADO: Adicionado o cartão estático do combinado logo acima do slider de prazo
 st.sidebar.markdown("---")
 st.sidebar.metric(label="📈 Rendimento Base Combinado", value="2,33% ao mês", delta="Garantido no Repasse")
 
@@ -166,7 +165,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# --- 1. DEFINIÇÃO DA SAZONALIDADE SOLAR DO BRASIL ---
+# --- DEFINIÇÃO DA SAZONALIDADE SOLAR DO BRASIL ---
 sazonalidade_mes = {
     1: 1.00, 2: 0.95, 3: 0.98, 4: 0.90, 
     5: 0.85, 6: 0.80, 7: 0.88, 
@@ -174,7 +173,7 @@ sazonalidade_mes = {
     11: 1.05, 12: 1.02
 }
 
-# 5. MOTOR DE CÁLCULO CORE COM SAZONALIDADE E DIRETRIZ DE CONTRATO
+# 5. MOTOR DE CÁLCULO CORE REVISADO (CONTRATOS DE CICLO FECHADO SEM INFLAÇÃO INTERNA)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -185,11 +184,11 @@ faturamento_dinamico_base = faturamento_por_usina
 
 for m in range(1, months_projection + 1):
     
-    # Identifica o mês do ano corrente (1 a 12) para mapear irradiação
+    # Identifica o mês do ano corrente (1 a 12) para aplicar o fator de irradiação
     mes_do_ano = ((m - 1) % 12) + 1
     fator_solar = sazonalidade_mes[mes_do_ano]
     
-    # Aplica o fator solar de pico diretamente no faturamento nominal do contrato
+    # Aplica o fator de sazonalidade sobre o valor fixado em contrato
     faturamento_reajustado_usina = faturamento_dinamico_base * fator_solar
 
     # Gatilho condicional de expansão patrimonial
@@ -203,7 +202,7 @@ for m in range(1, months_projection + 1):
                 "meses_sem_pagar": 0
             }
 
-    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL (FLEXÍVEL DE ALTA PERFORMANCE)
+    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL (FLEXÍVEL)
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
@@ -238,7 +237,7 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # 🔥 CÁLCULO DA TAXA DE RENDIMENTO REAL DINÂMICA
+    # CÁLCULO DA TAXA DE RENDIMENTO REAL DINÂMICA
     capital_proporcional = usinas_ativas * aporte_inicial
     taxa_rendimento_mes = (lucro_liquido_empresa / capital_proporcional) * 100 if capital_proporcional > 0 else 0
 
@@ -259,7 +258,7 @@ for m in range(1, months_projection + 1):
         "Faturamento Bruto": faturamento_bruto_visivel,
         "Parcelas Banco": custo_parcelas,
         "Lucro Líquido": lucro_liquido_empresa,
-        "Rendimento Mensal (%)": f"{taxa_rendimento_mes:.2f}%",  # 🔥 Nova coluna injetada
+        "Rendimento Mensal (%)": f"{taxa_rendimento_mes:.2f}%",
         "Saque Mensal": saque_investidor,
         "Caixa Acumulado": caixa_acumulado,
         "Patrimônio Usinas": patrimonio_ativos,
@@ -307,7 +306,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 row2_col1, row2_col2 = st.columns(2)
 
 with row2_col1:
-    st.markdown('<div class="panel-title-bar">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ VS HOLDING)</div>', unsafe_allow_html=True)
+    st.markdown("""<div class="panel-title-bar">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ VS HOLDING)</div>""", unsafe_allow_html=True)
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Patrimônio Usinas"], name="Patrimônio Real", line=dict(color="#10B981", width=3), fill='tozeroy', fillcolor='rgba(16, 185, 129, 0.03)'))
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
@@ -316,7 +315,7 @@ with row2_col1:
     st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
 with row2_col2:
-    st.markdown('<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>', unsafe_allow_html=True)
+    st.markdown("""<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>""", unsafe_allow_html=True)
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Bruto", line=dict(color="#FBBF24", width=2)))
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.03)'))
@@ -330,7 +329,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 row3_col1, row3_col2 = st.columns([1.2, 1])
 
 with row3_col1:
-    st.markdown('<div class="panel-title-bar">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>', unsafe_allow_html=True)
+    st.markdown("""<div class="panel-title-bar">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>""", unsafe_allow_html=True)
     fig3 = go.Figure(go.Bar(
         x=[retorno_solar_total, retorno_cdi_final, retorno_imovel_final],
         y=["Império Solar", "Renda Fixa (CDI)", "Imóvel Físico"],
@@ -347,7 +346,7 @@ with row3_col1:
     st.plotly_chart(fig3, use_container_width=True, config={'displayModeBar': False})
 
 with row3_col2:
-    st.markdown('<div class="panel-title-bar">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>', unsafe_allow_html=True)
+    st.markdown("""<div class="panel-title-bar">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>""", unsafe_allow_html=True)
     multiplicador = retorno_solar_total / (retorno_cdi_final if retorno_cdi_final > 0 else 1)
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 0 0 4px 4px; padding: 20px; height: 160px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
@@ -360,4 +359,13 @@ with row3_col2:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- LINHA 4: TABELA MÊS A MÊS ---
-st.markdown('<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)
+st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
+st.dataframe(df.style.format({
+    "Faturamento Bruto": "R$ {:,.2f}",
+    "Parcelas Banco": "R$ {:,.2f}",
+    "Lucro Líquido": "R$ {:,.2f}",
+    "Saque Mensal": "R$ {:,.2f}",
+    "Caixa Acumulado": "R$ {:,.2f}",
+    "Patrimônio Usinas": "R$ {:,.2f}",
+    "Valor Total Negócio": "R$ {:,.2f}"
+}), use_container_width=True, height=250)
