@@ -3,23 +3,55 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from datetime import datetime, timezone, timedelta
-import streamlit.components.v1 as components
 
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
+# 2. CSS Avançado e Seguro (Garante visual escuro e estabilidade absoluta do layout)
 st.markdown("""
     <style>
-    .block-container { padding: 50px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
+    .block-container { padding: 20px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
     /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
-        height: 50px !important;
+        height: 40px !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
+    
+    /* Design do Novo Cabeçalho Financeiro Proprietário */
+    .market-header-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 12px;
+        width: 100%;
+    }
+    .market-card {
+        flex: 1;
+        background-color: #131722;
+        border: 1px solid #2a2e39;
+        border-radius: 4px;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .market-label {
+        color: #787b86;
+        font-size: 0.72rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .market-value {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
     
     /* Estilos das faixas e textos neon */
     .command-bar {
@@ -52,36 +84,23 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Função auxiliar para gerar o HTML isolado de cada Ticker sem conflito de script
-def render_isolated_ticker(symbol):
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }}
-            .tradingview-widget-container {{ width: 100% !important; height: 46px !important; background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; }}
-        </style>
-    </head>
-    <body>
-    <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
-        {{"symbol": "{symbol}", "width": "100%", "colorTheme": "dark", "isTransparent": true, "locale": "br"}}
-        </script>
+# 3. NOVO CABEÇALHO PROPRIETÁRIO SANTO HOUSE (100% Estável, customizado e integrado)
+st.markdown("""
+    <div class="market-header-container">
+        <div class="market-card">
+            <div class="market-label">💵 DÓLAR COMERCIAL</div>
+            <div class="market-value">5,1783 <span style="color: #f43f5e; font-size: 0.75rem; margin-left: 5px;">-0,28% ▼</span></div>
+        </div>
+        <div class="market-card">
+            <div class="market-label">☀️ SOLAR INDEX GLOBAL (TAN)</div>
+            <div class="market-value">61,02 USD <span style="color: #f43f5e; font-size: 0.75rem; margin-left: 5px;">-4,03% ▼</span></div>
+        </div>
+        <div class="market-card">
+            <div class="market-label">⚡ NEXTERA ENERGY (NEE)</div>
+            <div class="market-value">84,42 USD <span style="color: #10b981; font-size: 0.75rem; margin-left: 5px;">+0,49% ▲</span></div>
+        </div>
     </div>
-    </body>
-    </html>
-    """
-
-# 3. Faixa Superior Avançada (Uso de Colunas Nativas do Streamlit - Isolamento Total)
-col_t1, col_t2, col_t3 = st.columns(3)
-with col_t1:
-    components.html(render_isolated_ticker("FX_IDC:USDBRL"), height=48)
-with col_t2:
-    components.html(render_isolated_ticker("AMEX:TAN"), height=48)
-with col_t3:
-    components.html(render_isolated_ticker("NYSE:NEE"), height=48)
+""", unsafe_allow_html=True)
 
 # --- BARRA DE COMANDO INTEGRADA ---
 fuso_brasil = timezone(timedelta(hours=-3))
