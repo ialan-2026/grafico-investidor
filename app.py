@@ -133,7 +133,6 @@ custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 300, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-# Alinhamento da nova taxa informada na equação do loop
 taxa_admin_pct = st.sidebar.slider("Taxa de O&M / Adm Santo House (%)", 0, 20, 0, step=1) / 100.0
 
 # Seletor de Estratégia Reativa
@@ -144,7 +143,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento reativo do ritmo e da quantidade máxima de usinas
+# Mapeamento do ritmo com a Chave de Seleção (Toggle) CORRIGIDA
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
@@ -155,7 +154,8 @@ elif "Agressivo" in perfil:
 else:
     st.sidebar.markdown("---")
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
-    if activar_expansao:
+    # CORREÇÃO CRÍTICA: Removido o caractere "c" da verificação abaixo
+    if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
         max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
     else:
@@ -163,7 +163,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. NOVO MOTOR DE CÁLCULO CORE COM REAJUSTE DE INFLAÇÃO TARIFÁRIA (IPCA)
+# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA COM DIRECIONAMENTO DE CONTRATOS
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -174,11 +174,11 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # GATILHO DE INFLAÇÃO: A cada 12 meses, a tarifa de energia sobe 5% (Média do IPCA)
+    # Gatilho de inflação anual da tarifa (IPCA 5%)
     if m > 1 and (m - 1) % 12 == 0:
         faturamento_dinamico_usina *= 1.05
 
-    # Gatilho condicional de expansão patrimonial (Até o limite de 5 anos / 60 meses)
+    # Gatilho condicional de expansão patrimonial
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -248,7 +248,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# --- 6. CÁLCULO DE ROI DO PAINEL 3 CORRIGIDO (JUROS COMPOSTOS DE LONGO PRAZO) ---
+# CÁLCULO DE ROI DO PAINEL 3 CORRIGIDO (JUROS COMPOSTOS DE LONGO PRAZO)
 anos_totais = months_projection / 12.0
 taxa_cdi_anual = 0.095
 retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
@@ -310,8 +310,6 @@ row3_col1, row3_col2 = st.columns([1.2, 1])
 
 with row3_col1:
     st.markdown('<div class="panel-title-bar">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>', unsafe_allow_html=True)
-    
-    # Plotagem atualizada com as variáveis de juros compostos reais de mercado
     fig3 = go.Figure(go.Bar(
         x=[retorno_solar_total, retorno_cdi_final, retorno_imovel_final],
         y=["Império Solar", "Renda Fixa (CDI)", "Imóvel Físico"],
