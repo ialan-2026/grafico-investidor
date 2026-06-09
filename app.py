@@ -11,10 +11,9 @@ st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sideb
 # 2. CSS Avançado e Seguro (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
 st.markdown("""
     <style>
-    /* CORREÇÃO DO CABEÇALHO: Adicionado padding-top de 50px para empurrar o app para baixo do menu fixo */
     .block-container { padding: 50px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Força o cabeçalho nativo a ficar alinhado ao fundo sem cobrir os gráficos */
+    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
         height: 50px !important;
@@ -53,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Isolada em HTML Puro (Garante a largura de 100% para ativar o Auto Scroll)
+# 3. Faixa Superior com 10 Ativos (Força o transbordo da tela e ativa o Auto Scroll contínuo)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -72,9 +71,13 @@ ticker_html = """
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
     {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELETROBRAS)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR ETF (TAN)"},
+    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"},
+    {"proName": "BMFBOVESPA:PETR4", "title": "PETROBRAS (PETR4)"},
+    {"proName": "BMFBOVESPA:VALE3", "title": "VALE S.A. (VALE3)"},
     {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"},
-    {"proName": "BMFBOVESPA:IFIX", "title": "FUNDS IMOBILIÁRIOS (IFIX)"}
+    {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500 INDEX"},
+    {"proName": "NASDAQ:NDX", "title": "NASDAQ 100"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
@@ -101,7 +104,6 @@ st.markdown(f"""
 
 # 4. Painel Lateral (Configuração com redução e centralização da Logo)
 try:
-    # Criando subcolunas internas na barra lateral para reduzir o tamanho da logo com margens limpas
     side_col1, side_col2, side_col3 = st.sidebar.columns([1, 4, 1])
     with side_col2:
         st.image("logo.jpg", use_container_width=True)
@@ -138,7 +140,7 @@ for m in range(1, months_projection + 1):
     parcelas_ativas = 0
     for u in range(1, usinas_ativas):
         mes_compra_usina = 1 + (u * meses_para_nova_usina)
-        if m >= mes_compra_usina and m < (mes_compra_usina + 60):
+        if m >= mes_compra_usina && m < (mes_compra_usina + 60):
             parcelas_ativas += 1
 
     faturamento_bruto = usinas_ativas * faturamento_por_usina
