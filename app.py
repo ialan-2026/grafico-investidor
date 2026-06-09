@@ -52,13 +52,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior com 10 Ativos (Força o transbordo da tela e ativa o Auto Scroll contínuo)
+# 3. Faixa Superior (Letreiro com códigos atualizados para o padrão B3 e NYSEARCA)
 ticker_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; width: 100%; }
+        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; width: 100vw; }
         .tradingview-widget-container { width: 100% !important; }
     </style>
 </head>
@@ -69,20 +69,18 @@ ticker_html = """
   {
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
-    {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELETROBRAS)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"},
-    {"proName": "BMFBOVESPA:PETR4", "title": "PETROBRAS (PETR4)"},
-    {"proName": "BMFBOVESPA:VALE3", "title": "VALE S.A. (VALE3)"},
-    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"},
-    {"proName": "FOREXCOM:SPXUSD", "title": "S&P 500 INDEX"},
-    {"proName": "NASDAQ:NDX", "title": "NASDAQ 100"}
+    {"proName": "B3:IBOV", "title": "IBOVESPA"},
+    {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELET3)"},
+    {"proName": "NYSEARCA:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
+    {"proName": "B3:PETR4", "title": "PETROBRAS (PETR4)"},
+    {"proName": "B3:VALE3", "title": "VALE S.A. (VALE3)"},
+    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "regular",
+  "displayMode": "adaptive",
   "locale": "br"
 }
   </script>
@@ -120,10 +118,10 @@ pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 1
 
 if perfil == "Conservador Escalável":
     meses_para_nova_usina = 12
-    st.sidebar.info("ℹ️ Frequência travada em 12 meses para o perfil Conservador.")
+    st.sidebar.info("ℹbox Frequência travada em 12 meses para o perfil Conservador.")
 elif perfil == "Agressivo Bimestral":
     meses_para_nova_usina = 2
-    st.sidebar.info("ℹ️ Frequência travada em 2 meses para o perfil Agressivo.")
+    st.sidebar.info("ℹbox Frequência travada em 2 meses para o perfil Agressivo.")
 else:
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
@@ -140,7 +138,6 @@ for m in range(1, months_projection + 1):
     parcelas_ativas = 0
     for u in range(1, usinas_ativas):
         mes_compra_usina = 1 + (u * meses_para_nova_usina)
-        # CORREÇÃO DA SINTAXE AQUI: Trocado '&&' por 'and' nativo do Python
         if m >= mes_compra_usina and m < (mes_compra_usina + 60):
             parcelas_ativas += 1
 
