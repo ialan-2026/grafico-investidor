@@ -1,5 +1,5 @@
 import streamlit as st
-import plotly.graph_objects go
+import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from datetime import datetime, timezone, timedelta
@@ -128,7 +128,7 @@ custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-# Seletor de Estratégia Reativa solicitado
+# Seletor de Estratégia Reativa
 st.sidebar.markdown("---")
 st.sidebar.markdown("<h4 style='color:#cbd5e1; margin-bottom: 2px;'>🎯 Alocação do Caixa</h4>", unsafe_allow_html=True)
 estrategia_caixa = st.sidebar.radio(
@@ -153,7 +153,7 @@ financiamentos = {}
 id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
-    # Gatilho de expansão das usinas financiadas (até o limite de 5 anos / 60 meses)
+    # Gatilho de expansão das usinas financiadas
     if m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
         id_usina_atual += 1
