@@ -20,9 +20,9 @@ st.markdown("""
     .tv-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        grid-template-rows: 50vh 45vh; /* Ajustado para deixar espaço para a faixa no topo */
-        gap: 2px; /* Apenas um fio de separação entre os blocos, como no TradingView */
-        background-color: #2a2e39; /* Cor das "linhas" entre os blocos */
+        grid-template-rows: 50vh 45vh; 
+        gap: 2px; 
+        background-color: #2a2e39; 
         height: 95vh;
         width: 100vw;
     }
@@ -76,7 +76,8 @@ ticker_html = """
     </div>
 </div>
 """
-components.html(ticker_html, height=45, margin=0)
+# CORREÇÃO AQUI: removido o margin=0
+components.html(ticker_html, height=45)
 
 # 4. Parâmetros Ocultos (Barra Lateral)
 investimento_inicial = st.sidebar.number_input("APORTE (R$)", min_value=100000, value=300000, step=50000)
@@ -143,11 +144,11 @@ grid_html = f"""
 
     <div class="tv-panel" id="q3">
         <div class="panel-header"><div>📉 CASHFLOW & AMORTIZAÇÃO (BRL)</div></div>
-        </div>
+    </div>
 
     <div class="tv-panel" id="q4">
         <div class="panel-header"><div>🚀 PROJEÇÃO DE ALAVANCAGEM EXPONENCIAL (LOG)</div></div>
-        </div>
+    </div>
 </div>
 """
 st.markdown(grid_html, unsafe_allow_html=True)
@@ -161,6 +162,5 @@ div[data-testid="stMainBlockContainer"] > div > div:nth-child(5) { position: abs
 </style>
 """, unsafe_allow_html=True)
 
-# Renderiza os gráficos. O CSS acima joga o fig1 pra esquerda e o fig2 pra direita
 st.plotly_chart(fig1, use_container_width=True)
 st.plotly_chart(fig2, use_container_width=True)
