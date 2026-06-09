@@ -140,7 +140,8 @@ for m in range(1, months_projection + 1):
     parcelas_ativas = 0
     for u in range(1, usinas_ativas):
         mes_compra_usina = 1 + (u * meses_para_nova_usina)
-        if m >= mes_compra_usina && m < (mes_compra_usina + 60):
+        # CORREÇÃO DA SINTAXE AQUI: Trocado '&&' por 'and' nativo do Python
+        if m >= mes_compra_usina and m < (mes_compra_usina + 60):
             parcelas_ativas += 1
 
     faturamento_bruto = usinas_ativas * faturamento_por_usina
