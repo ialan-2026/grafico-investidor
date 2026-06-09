@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.0 // ASSET INFLATION ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.0 // FIXED CYCLE SCENARIO</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -128,9 +128,9 @@ perfil = st.sidebar.selectbox(
 )
 
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
-faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Inicial por Usina (R$)", value=6000, step=500)
+faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Fixo por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
-months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 300, step=12)
+months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
 taxa_admin_pct = st.sidebar.slider("Taxa de O&M / Adm Santo House (%)", 0, 20, 0, step=1) / 100.0
@@ -143,7 +143,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento do ritmo com a Chave de Seleção (Toggle) CORRIGIDA
+# Mapeamento do ritmo com a Chave de Seleção (Toggle)
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
@@ -154,7 +154,6 @@ elif "Agressivo" in perfil:
 else:
     st.sidebar.markdown("---")
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
-    # CORREÇÃO CRÍTICA: Removido o caractere "c" da verificação abaixo
     if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
         max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
@@ -163,22 +162,17 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE DE ALTA TESOURARIA COM DIRECIONAMENTO DE CONTRATOS
+# 5. MOTOR DE CÁLCULO CORE REVISADO (FATURAMENTO FIXO POR CONTRATO)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
-faturamento_dinamico_usina = faturamento_por_usina
 financiamentos = {}
 id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho de inflação anual da tarifa (IPCA 5%)
-    if m > 1 and (m - 1) % 12 == 0:
-        faturamento_dinamico_usina *= 1.05
-
-    # Gatilho condicional de expansão patrimonial
+    # Gatilho condicional de expansão patrimonial (Até o limite de 5 anos / 60 meses)
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -211,8 +205,8 @@ for m in range(1, months_projection + 1):
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
-    # EXECUÇÃO DA MATEMÁTICA CONTRATUAL COM INFLAÇÃO E TAXA DE ADM
-    faturamento_bruto = usinas_ativas * faturamento_dinamico_usina
+    # AJUSTADO: Faturamento fixo por usina (Ciclo Fechado comercial estável)
+    faturamento_bruto = usinas_ativas * faturamento_por_usina
     faturamento_santo_house = faturamento_bruto * taxa_admin_pct
     faturamento_liquido_holding = faturamento_bruto - faturamento_santo_house
     lucro_liquido_empresa = faturamento_liquido_holding - custo_parcelas_no_mes
@@ -230,7 +224,7 @@ for m in range(1, months_projection + 1):
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
             financiamentos[id_u]["parcelas_restantes"] -= 1 
 
-    patrimonio_ativos = usinas_ativas * aporte_inicial
+    patrimonio_ativos = usinas_ativas *豪 porte_inicial if 'porte_inicial' in locals() else usinas_ativas * aporte_inicial
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
     data.append({
@@ -248,7 +242,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# CÁLCULO DE ROI DO PAINEL 3 CORRIGIDO (JUROS COMPOSTOS DE LONGO PRAZO)
+# CÁLCULO DE ROI DO PAINEL 3 REALISTA (JUROS COMPOSTOS DE MERCADO LONGO PRAZO)
 anos_totais = months_projection / 12.0
 taxa_cdi_anual = 0.095
 retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
