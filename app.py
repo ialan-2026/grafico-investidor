@@ -8,14 +8,15 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e botões da barra lateral ativos)
+# 2. CSS Avançado (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
 st.markdown("""
     <style>
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Mantém o cabeçalho nativo visível para a seta funcionar, mas com a cor de fundo idêntica */
+    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
+        height: 45px !important;
     } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
@@ -51,9 +52,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Ultra-Estável (Apenas os ativos homologados e funcionais)
+# 3. Faixa Superior Isolada em HTML Puro (Garante renderização estável e letreiro em movimento)
 ticker_html = """
-<div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }
+    </style>
+</head>
+<body>
+<div class="tradingview-widget-container">
   <div class="tradingview-widget-container__widget"></div>
   <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
   {
@@ -66,13 +75,16 @@ ticker_html = """
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "regular",
+  "displayMode": "adaptive",
   "locale": "br"
 }
   </script>
 </div>
+</body>
+</html>
 """
-components.html(ticker_html, height=52)
+# Força o componente a respeitar a largura da tela com o uso seguro do iframe
+components.html(ticker_html, height=48)
 
 # --- BARRA DE COMANDO INTEGRADA ---
 fuso_brasil = timezone(timedelta(hours=-3))
