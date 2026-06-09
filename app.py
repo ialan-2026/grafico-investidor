@@ -130,7 +130,9 @@ perfil = st.sidebar.selectbox(
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
-months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
+
+# AJUSTADO: Slider agora estendido para até 300 meses (25 anos completos)
+months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 300, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
 # Seletor de Estratégia Reativa
@@ -141,11 +143,11 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# AJUSTE FINO: Mapeamento reativo do ritmo e da QUANTIDADE TOTAL MÁXIMA de usinas
+# Mapeamento reativo do ritmo e da quantidade máxima de usinas
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
-    max_usinas = 999  # Preserva o comportamento original ilimitado dos perfis prontos
+    max_usinas = 999
 elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
     max_usinas = 999
@@ -154,7 +156,6 @@ else:
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
     if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
-        # NOVO CONTROLE: Define o teto físico do parque de usinas da holding
         max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
     else:
         expandir_usinas = False
@@ -171,9 +172,8 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansão controlado pela frequência E pela trava de quantidade máxima
+    # Gatilho condicional de expansão controlado pela frequência e trava de quantidade máxima (até 60 meses)
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
-        # TRAVA AJUSTADA: Só adquire um novo ativo se ainda não bateu a meta estipulada pelo usuário
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
             id_usina_atual += 1
@@ -271,10 +271,14 @@ st.markdown("<br>", unsafe_allow_html=True)
 row2_col1, row2_col2 = st.columns(2)
 
 with row2_col1:
-    st.markdown('<div class="panel-title-bar">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="panel-title-bar">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ VS HOLDING)</div>', unsafe_allow_html=True)
     fig1 = go.Figure()
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Patrimônio Usinas"], name="Patrimônio Real", line=dict(color="#10B981", width=3), fill='tozeroy', fillcolor='rgba(16, 185, 129, 0.03)'))
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
+    
+    # AJUSTADO: Nova linha proprietária de Valorização Absoluta da Holding solicitada
+    fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Valor Total Negócio"], name="Valor da Holding", line=dict(color="#FF9F43", width=3)))
+    
     fig1.update_layout(**layout_charts, height=260)
     st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
