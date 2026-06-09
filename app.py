@@ -136,27 +136,27 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Definição do ritmo com base no perfil escolhido
-if "Conservador" in perfil:
-    meses_para_nova_usina = 12  
-elif "Agressivo" in perfil:
-    meses_para_nova_usina = 2   
-else:
-    meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
-
-# 5. NOVO MOTOR: Engenharia Financeira de Amortização Invertida
+# 5. MOTOR DE CÁLCULO ATUALIZADO: QUITAÇÃO DAS 12 PRIMEIRAS PARCELAS
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
 
 # Rastreamento dinâmico: {id_usina: {"parcelas_restantes": 60, "primeiras_12_pagas": False, "meses_sem_pagar": 0}}
-# Nota: A primeira usina (Usina 1) entra como quitada pelo aporte inicial, dívidas iniciam nas expansões.
 financiamentos = {}
 id_usina_atual = 1
 
+# Mapeamento do ritmo com base na sua variável 'perfil' da sidebar
+if "Conservador" in perfil:
+    meses_para_nova_usina = 12
+elif "Agressivo" in perfil:
+    meses_para_nova_usina = 2
+else:
+    meses_para_nova_usina = 1
+
 for m in range(1, months_projection + 1):
-    # Gatilho de expansão das usinas financiadas (Até o limite de 5 anos / 60 meses)
+    
+    # 1. Ativação de novas usinas escaladas (Até o limite de 5 anos / 60 meses)
     if m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
         id_usina_atual += 1
@@ -166,28 +166,33 @@ for m in range(1, months_projection + 1):
             "meses_sem_pagar": 0
         }
 
-    # MOTOR DE QUITAÇÃO DAS 12 PRIMEIRAS PARCELAS EM CASCATA INVERTIDA
+    # 2. SELEÇÃO DA ESTRATÉGIA DE ALOCAÇÃO DO CAIXA DO MENU LATERAL
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
+            # Se a usina acabou de entrar e ainda não teve o juro pesado dos 12 primeiros meses abatido
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] == 60:
+                # Custo das 12 parcelas com desconto real de antecipação (ex: 15% de desconto no juro)
                 custo_12_parcelas_antecipadas = 12 * (custo_parcela_banco * 0.85)
                 
+                # Se a holding tem caixa, ela dá o tiro e liquida o lote caro de juros
                 if caixa_acumulado >= custo_12_parcelas_antecipadas:
                     caixa_acumulado -= custo_12_parcelas_antecipadas
                     financiamentos[id_u]["primeiras_12_pagas"] = True
                     financiamentos[id_u]["parcelas_restantes"] -= 12
-                    financiamentos[id_u]["meses_sem_pagar"] = 12  # Ativa carência de 12 meses
-                    break  # Executa uma quitação por lote mensal para segurança do fluxo
+                    financiamentos[id_u]["meses_sem_pagar"] = 12 # Isenção de parcelas por 12 meses
+                    break # Executa uma quitação por vez para proteger a liquidez imediata
 
-    # Calcular custo operacional real consolidado do mês corrente
+    # 3. Cálculo dinâmico do custo de boletos que restaram para este mês específico
     custo_parcelas_no_mes = 0
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["parcelas_restantes"] > 0:
+            # Se o lote de 12 meses já foi pago antecipadamente e ainda está ativo, a parcela zera
             if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
-                custo_parcelas_no_mes += 0  # Isenção de fluxo ganha pela amortização antecipada
+                custo_parcelas_no_mes += 0
             else:
                 custo_parcelas_no_mes += custo_parcela_banco
 
+    # 4. Consolidação do Fluxo de Caixa da holding
     faturamento_bruto = usinas_ativas * faturamento_por_usina
     lucro_liquido_empresa = faturamento_bruto - custo_parcelas_no_mes
     
@@ -197,13 +202,14 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # Consumir tempo de contrato dos financiamentos em andamento
+    # 5. Update dos cronogramas de tempo para o próximo mês do loop
     for id_u in financiamentos.keys():
         if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
-            financiamentos[id_u]["meses_sem_pagar"] -= 1  # Consome carência conquistada
+            financiamentos[id_u]["meses_sem_pagar"] -= 1 # Consome o lote antecipado
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
-            financiamentos[id_u]["parcelas_restantes"] -= 1  # Amortização temporal padrão
+            financiamentos[id_u]["parcelas_restantes"] -= 1 # Consome o contrato padrão a partir do mês 13
 
+    # Preservando as mesmas chaves que alimentam suas tabelas e os 3 painéis
     patrimonio_ativos = usinas_ativas * 300000
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
@@ -222,7 +228,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# Configuração de Design Gráfico (Estilo TradingView)
+# Configuração Padrão de Design Gráfico (Estilo TradingView)
 layout_charts = dict(
     paper_bgcolor='#131722', plot_bgcolor='#131722',
     font=dict(color='#787b86', size=10),
