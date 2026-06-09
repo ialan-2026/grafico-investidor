@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (JSON limpo e corrigido para destravar o motor de animação do TradingView)
+# 3. Faixa Superior Estática Otimizada (Apenas os 3 principais ativos que cabem com folga)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -70,16 +70,7 @@ ticker_html = """
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
-    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"},
-    {"proName": "BINANCE:ETHUSDT", "title": "ETHEREUM (ETH)"},
-    {"proName": "NASDAQ:TSLA", "title": "TESLA ENERGY (TSLA)"},
-    {"proName": "FX:EURUSD", "title": "EURO / DÓLAR"},
-    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL"},
-    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
-    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"}
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
@@ -97,7 +88,7 @@ components.html(ticker_html, height=48)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.6 // LIVE BENCHMARK ROTATION SYSTEM</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.6 // BENCHMARK INDEX COMPONENT</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
