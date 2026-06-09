@@ -8,13 +8,12 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e evita sobreposição do cabeçalho)
+# 2. CSS Avançado e Seguro (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
 st.markdown("""
     <style>
-    /* CORREÇÃO DO CABEÇALHO: Adicionado padding-top de 50px para empurrar o app para baixo do menu fixo */
     .block-container { padding: 50px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
-    /* Força o cabeçalho nativo a ficar alinhado ao fundo sem cobrir os gráficos */
+    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
         height: 50px !important;
@@ -53,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Isolada em HTML Puro (Garante renderização estável e letreiro em movimento)
+# 3. Faixa Superior Otimizada (Uso de ADRs Globais para evitar bloqueios da B3 e forçar a rolagem)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -70,12 +69,14 @@ ticker_html = """
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
     {"proName": "BMFBOVESPA:IBOV", "title": "IBOVESPA"},
-    {"proName": "BMFBOVESPA:ELET3", "title": "ENERGIA (ELET3)"},
-    {"proName": "AMEX:TAN", "title": "SOLAR ETF (TAN)"}
+    {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELETROBRAS)"},
+    {"proName": "NYSE:CPFE", "title": "SETOR ELÉTRICO (CPFL)"},
+    {"proName": "AMEX:TAN", "title": "SOLAR GLOBAL ETF (TAN)"},
+    {"proName": "NYSE:VNQ", "title": "FUNDOS IMOBILIÁRIOS (REITs)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
-  "isTransparent": true, 
+  "isTransparent": true,
   "displayMode": "regular",
   "locale": "br"
 }
