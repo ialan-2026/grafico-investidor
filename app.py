@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Letreiro com códigos atualizados em modo REGULAR para Auto Scroll Infinito)
+# 3. Faixa Superior (JSON limpo e corrigido para destravar o motor de animação do TradingView)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -75,12 +75,15 @@ ticker_html = """
     {"proName": "BINANCE:ETHUSDT", "title": "ETHEREUM (ETH)"},
     {"proName": "NASDAQ:TSLA", "title": "TESLA ENERGY (TSLA)"},
     {"proName": "FX:EURUSD", "title": "EURO / DÓLAR"},
-    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL"}
+    {"proName": "OANDA:XAUUSD", "title": "OURO COMERCIAL"},
+    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
+    {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
+    {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "regular",
   "locale": "br"
 }
   </script>
