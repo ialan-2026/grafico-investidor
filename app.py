@@ -8,36 +8,15 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e colado estilo TradingView)
+# 2. CSS Seguro (Apenas cores, fontes e efeitos neon - Sem quebrar o layout das colunas)
 st.markdown("""
     <style>
-    /* Forçar preenchimento de tela inteira sem margens bobas */
     .block-container { padding: 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     header { visibility: hidden !important; } 
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
     
-    /* Customização das colunas nativas para parecerem painéis do TradingView */
-    div[data-testid="stColumn"] {
-        background-color: #131722 !important;
-        border: 1px solid #2a2e39 !important;
-        border-radius: 4px !important;
-        padding: 15px !important;
-        margin-bottom: 5px !important;
-    }
-    
-    .panel-header {
-        color: #787b86;
-        font-size: 0.8rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        border-bottom: 1px solid #2a2e39;
-        padding-bottom: 5px;
-        margin-bottom: 15px;
-    }
-    
-    /* Faixa de comando do terminal superior */
+    /* Estilos das faixas e textos neon */
     .command-bar {
         background-color: #131722;
         border: 1px solid #2a2e39;
@@ -48,21 +27,27 @@ st.markdown("""
         padding: 6px 15px;
         font-size: 0.75rem;
         color: #787b86;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
     }
-    
-    /* Layout dos Grandes Números */
-    .tv-metric-box { text-align: center; padding: 5px 0; }
-    .tv-label { color: #787b86; font-size: 0.85rem; text-transform: uppercase; }
-    .tv-value { font-size: 2.3rem; font-weight: bold; margin-top: 2px; }
-    
-    .neon-green { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
-    .neon-blue { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
-    .neon-purple { color: #a78bfa; text-shadow: 0 0 10px rgba(167, 139, 250, 0.2); }
+    .panel-title-bar {
+        background-color: #131722;
+        color: #787b86;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border: 1px solid #2a2e39;
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
+        padding: 6px 12px;
+    }
+    .neon-green { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+    .neon-blue { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+    .neon-purple { color: #a78bfa; text-shadow: 0 0 10px rgba(167, 139, 250, 0.3); }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Ticker de Ações do TradingView Otimizado)
+# 3. Faixa Superior (Ticker de Ações do TradingView)
 ticker_html = """
 <div class="tradingview-widget-container" style="background-color: #0c0f16; overflow: hidden;">
   <div class="tradingview-widget-container__widget"></div>
@@ -74,11 +59,7 @@ ticker_html = """
     {"proName": "BMFBOVESPA:IEE", "title": "ÍNDICE ENERGIA (B3)"},
     {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL"}
   ],
-  "showSymbolLogo": true, 
-  "colorTheme": "dark", 
-  "isTransparent": true, 
-  "displayMode": "adaptive", 
-  "locale": "br"
+  "showSymbolLogo": true, "colorTheme": "dark", "isTransparent": true, "displayMode": "adaptive", "locale": "br"
 }
   </script>
 </div>
@@ -89,13 +70,13 @@ components.html(ticker_html, height=52)
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SOLAR WEALTH TERMINAL v3.1 // MARKET DATAFEED</div>
+        <div>❖ SOLAR WEALTH TERMINAL v3.2 // MAIN DATA FEED</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
 """, unsafe_allow_html=True)
 
-# 4. Painel Lateral (Inputs da Modelagem Financeira)
+# 4. Painel Lateral (Configuração limpa e sem bugs de travamento)
 st.sidebar.markdown("<h3 style='color:#3b82f6;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=300000, step=50000)
@@ -104,21 +85,15 @@ custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-# CORREÇÃO AQUI: Define o valor padrão baseado no perfil, mas mantém o slider sempre visível
+# Regra de exibição inteligente do filtro de meses solicitada por você
 if perfil == "Conservador Escalável":
-    default_meses = 12
+    meses_para_nova_usina = 12
+    st.sidebar.info("ℹ️ Frequência travada em 12 meses para o perfil Conservador.")
 elif perfil == "Agressivo Bimestral":
-    default_meses = 2
+    meses_para_nova_usina = 2
+    st.sidebar.info("ℹ️ Frequência travada em 2 meses para o perfil Agressivo.")
 else:
-    default_meses = 6
-
-meses_para_nova_usina = st.sidebar.slider(
-    "Frequência de Nova Usina (A cada X meses)", 
-    min_value=1, 
-    max_value=24, 
-    value=default_meses,
-    key=f"freq_slider_{perfil}"  # Força o Streamlit a atualizar o valor quando o perfil muda
-)
+    meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
 # 5. Lógica da Engenharia Financeira
 data = []
@@ -162,13 +137,110 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# Configuração de Layout Comum para os Gráficos
+# Configuração Padrão das Telas do TradingView (Gráficos)
 layout_charts = dict(
-    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='#131722', plot_bgcolor='#131722',
     font=dict(color='#787b86', size=10),
     xaxis=dict(showgrid=True, gridcolor='#2a2e39', zeroline=False),
     yaxis=dict(showgrid=True, gridcolor='#2a2e39', zeroline=False),
-    margin=dict(l=40, r=10, t=10, b=20), hovermode='x unified'
+    margin=dict(l=45, r=15, t=15, b=25), hovermode='x unified'
 )
 
-# =================
+# Função auxiliar para renderizar os cards de métricas de forma segura contra colapsos
+def render_metric_card(label, value, color_class):
+    st.markdown(f"""
+        <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; padding: 15px; text-align: center;">
+            <div style="color: #787b86; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{label}</div>
+            <div class="{color_class}" style="font-size: 2rem; font-weight: bold; margin-top: 5px;">{value}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# =========================================================
+# LINHA 1: METRICAS PRINCIPAIS
+# =========================================================
+col_m1, col_m2, col_m3 = st.columns(3)
+with col_m1:
+    render_metric_card("Valor Total do Negócio (Holding)", f"R$ {retorno_solar_total:,.2f}", "neon-green")
+with col_m2:
+    render_metric_card("Dinheiro Sacado para o Bolso", f"R$ {total_sacado_investidor:,.2f}", "neon-blue")
+with col_m3:
+    render_metric_card("Total de Usinas Operando", f"{int(df['Usinas'].iloc[-1])} Usinas", "neon-purple")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =========================================================
+# LINHA 2: GRÁFICOS LADO A LADO
+# =========================================================
+row2_col1, row2_col2 = st.columns(2)
+
+with row2_col1:
+    st.markdown('<div class="panel-title-bar">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ)</div>', unsafe_allow_html=True)
+    fig1 = go.Figure()
+    fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Patrimônio Usinas"], name="Patrimônio Real", line=dict(color="#10B981", width=3), fill='tozeroy', fillcolor='rgba(16, 185, 129, 0.03)'))
+    fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
+    fig1.update_layout(**layout_charts, height=260)
+    st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
+
+with row2_col2:
+    st.markdown('<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>', unsafe_allow_html=True)
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Bruto", line=dict(color="#FBBF24", width=2)))
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.03)'))
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Saque Mensal"], name="Seu Saque", line=dict(color="#F43F5E", width=1.5, dash='dash')))
+    fig2.update_layout(**layout_charts, height=260)
+    st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =========================================================
+# LINHA 3: COMPARATIVO MERCADO + TEXTO ESTRATÉGICO
+# =========================================================
+row3_col1, row3_col2 = st.columns([1.2, 1])
+
+with row3_col1:
+    st.markdown('<div class="panel-title-bar">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>', unsafe_allow_html=True)
+    anos = months_projection / 12.0
+    retorno_cdi = aporte_inicial * ((1 + 0.105) ** anos)
+    retorno_imovel = aporte_inicial + (aporte_inicial * 0.05 * anos)
+    
+    fig3 = go.Figure(go.Bar(
+        x=[retorno_solar_total, retorno_cdi, retorno_imovel],
+        y=["Império Solar", "Renda Fixa (CDI)", "Imóvel Físico"],
+        orientation='h',
+        marker_color=['#10B981', '#334155', '#1e293b']
+    ))
+    fig3.update_layout(
+        paper_bgcolor='#131722', plot_bgcolor='#131722',
+        font=dict(color='#787b86', size=10),
+        xaxis=dict(showgrid=True, gridcolor='#2a2e39'),
+        yaxis=dict(showgrid=False),
+        margin=dict(l=10, r=15, t=15, b=15), height=160
+    )
+    st.plotly_chart(fig3, use_container_width=True, config={'displayModeBar': False})
+
+with row3_col2:
+    st.markdown('<div class="panel-title-bar">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>', unsafe_allow_html=True)
+    multiplicador = retorno_solar_total / retorno_cdi
+    st.markdown(f"""
+        <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 0 0 4px 4px; padding: 20px; height: 160px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
+            Ao adotar a estratégia selecionada, o capital injetado se multiplica de forma geométrica através do efeito cascata. 
+            Enquanto as aplicações tradicionais prendem o investidor em uma linha reta corroída pela inflação, o modelo operacional 
+            solar entrega um retorno total estimado de <b style="color:#10b981;">{multiplicador:.1f}x maior que o CDI</b>, transformando receita operacional em patrimônio líquido consolidado.
+        </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# =========================================================
+# LINHA 4: TABELA MÊS A MÊS
+# =========================================================
+st.markdown('<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>', unsafe_allow_html=True)
+st.dataframe(df.style.format({
+    "Faturamento Bruto": "R$ {:,.2f}",
+    "Parcelas Banco": "R$ {:,.2f}",
+    "Lucro Líquido": "R$ {:,.2f}",
+    "Saque Mensal": "R$ {:,.2f}",
+    "Caixa Acumulado": "R$ {:,.2f}",
+    "Patrimônio Usinas": "R$ {:,.2f}",
+    "Valor Total Negócio": "R$ {:,.2f}"
+}), use_container_width=True, height=250)
