@@ -104,13 +104,13 @@ st.markdown("""
 
 # --- BARRA DE COMANDO INTEGRADA ---
 fuso_brasil = timezone(timedelta(hours=-3))
-st.markdown(f"""
+st.markdown("""
     <div class="command-bar">
         <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // SEASONAL PERFORMANCE ENGINE</div>
-        <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
+        <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
-""", unsafe_allow_html=True)
+""".format(datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")), unsafe_allow_html=True)
 
 # 4. Painel Lateral (Configuração de Inputs e Estratégia de Caixa)
 try:
@@ -131,8 +131,15 @@ aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=24
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Inicial por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 
+# 🚀 CORREÇÃO MATEMÁTICA DA TAXA BASE: Agora ela calcula de verdade dividindo o faturamento pelo aporte configurado!
+taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
+
 st.sidebar.markdown("---")
-st.sidebar.metric(label="📈 Rendimento Base Combinado", value="2,33% ao mês", delta="Garantido no Repasse")
+st.sidebar.metric(
+    label="📈 Rendimento Base Combinado", 
+    value=f"{taxa_base_calculada:.2f}% ao mês", 
+    delta="Garantido no Repasse"
+)
 
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
