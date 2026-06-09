@@ -104,12 +104,21 @@ custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
+# CORREÇÃO AQUI: Define o valor padrão baseado no perfil, mas mantém o slider sempre visível
 if perfil == "Conservador Escalável":
-    meses_para_nova_usina = 12
+    default_meses = 12
 elif perfil == "Agressivo Bimestral":
-    meses_para_nova_usina = 2
+    default_meses = 2
 else:
-    meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
+    default_meses = 6
+
+meses_para_nova_usina = st.sidebar.slider(
+    "Frequência de Nova Usina (A cada X meses)", 
+    min_value=1, 
+    max_value=24, 
+    value=default_meses,
+    key=f"freq_slider_{perfil}"  # Força o Streamlit a atualizar o valor quando o perfil muda
+)
 
 # 5. Lógica da Engenharia Financeira
 data = []
@@ -162,86 +171,4 @@ layout_charts = dict(
     margin=dict(l=40, r=10, t=10, b=20), hovermode='x unified'
 )
 
-# =========================================================
-# LINHA 1: MÉTRICAS MAJESTOSAS DE DESEMPENHO DO IMPÉRIO
-# =========================================================
-col_m1, col_m2, col_m3 = st.columns(3)
-with col_m1:
-    st.markdown(f'<div class="tv-metric-box"><div class="tv-label">Valor Total do Negócio (Holding)</div><div class="tv-value neon-green">R$ {retorno_solar_total:,.2f}</div></div>', unsafe_allow_html=True)
-with col_m2:
-    st.markdown(f'<div class="tv-metric-box"><div class="tv-label">Dinheiro Sacado para o Bolso</div><div class="tv-value neon-blue">R$ {total_sacado_investidor:,.2f}</div></div>', unsafe_allow_html=True)
-with col_m3:
-    st.markdown(f'<div class="tv-metric-box"><div class="tv-label">Total de Usinas Operando</div><div class="tv-value neon-purple">{int(df["Usinas"].iloc[-1])} Usinas</div></div>', unsafe_allow_html=True)
-
-# =========================================================
-# LINHA 2: DOIS GRÁFICOS FINANCEIROS EM PARALELO
-# =========================================================
-row2_col1, row2_col2 = st.columns(2)
-
-with row2_col1:
-    st.markdown('<div class="panel-header">📈 PAINEL 1: ESCALA PATRIMONIAL (ATIVOS VS LIQUIDEZ)</div>', unsafe_allow_html=True)
-    fig1 = go.Figure()
-    fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Patrimônio Usinas"], name="Patrimônio Real", line=dict(color="#10B981", width=3), fill='tozeroy', fillcolor='rgba(16, 185, 129, 0.03)'))
-    fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
-    fig1.update_layout(**layout_charts, height=260)
-    st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
-
-with row2_col2:
-    st.markdown('<div class="panel-header">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>', unsafe_allow_html=True)
-    fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Bruto", line=dict(color="#FBBF24", width=2)))
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.03)'))
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Saque Mensal"], name="Seu Saque", line=dict(color="#F43F5E", width=1.5, dash='dash')))
-    fig2.update_layout(**layout_charts, height=260)
-    st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
-
-# =========================================================
-# LINHA 3: DESTRUIÇÃO DE ALTERNATIVAS (MARKETING) + DATA
-# =========================================================
-row3_col1, row3_col2 = st.columns([1.2, 1])
-
-with row3_col1:
-    st.markdown('<div class="panel-header">🏛️ PAINEL 3: DESTRUIÇÃO DE ALTERNATIVAS DO MERCADO</div>', unsafe_allow_html=True)
-    anos = months_projection / 12.0
-    retorno_cdi = aporte_inicial * ((1 + 0.105) ** anos)
-    retorno_imovel = aporte_inicial + (aporte_inicial * 0.05 * anos)
-    
-    fig3 = go.Figure(go.Bar(
-        x=[retorno_solar_total, retorno_cdi, retorno_imovel],
-        y=["Império Solar", "Renda Fixa (CDI)", "Imóvel Físico"],
-        orientation='h',
-        marker_color=['#10B981', '#334155', '#1e293b']
-    ))
-    fig3.update_layout(
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color='#787b86', size=10),
-        xaxis=dict(showgrid=True, gridcolor='#2a2e39'),
-        yaxis=dict(showgrid=False),
-        margin=dict(l=10, r=10, t=10, b=10), height=160
-    )
-    st.plotly_chart(fig3, use_container_width=True, config={'displayModeBar': False})
-
-with row3_col2:
-    st.markdown('<div class="panel-header">📝 INSIGHT ESTRATÉGICO PARA O PITCH</div>', unsafe_allow_html=True)
-    multiplicador = retorno_solar_total / retorno_cdi
-    st.markdown(f"""
-    <div style="font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; padding: 5px;">
-        Ao adotar o perfil <b style="color:#3b82f6;">{perfil}</b>, o capital injetado se multiplica de forma geométrica. 
-        Enquanto o banco transforma o dinheiro do investidor em uma linha reta previsível e corroída pela inflação, 
-        a engenharia em cascata solar gera um retorno total estimado de <b style="color:#10b981;">{multiplicador:.1f}x maior que o CDI</b> no mesmo período.
-    </div>
-    """, unsafe_allow_html=True)
-
-# =========================================================
-# LINHA 4: TABELA DE AUDITORIA DO TERMINAL
-# =========================================================
-st.markdown('<div class="panel-header">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>', unsafe_allow_html=True)
-st.dataframe(df.style.format({
-    "Faturamento Bruto": "R$ {:,.2f}",
-    "Parcelas Banco": "R$ {:,.2f}",
-    "Lucro Líquido": "R$ {:,.2f}",
-    "Saque Mensal": "R$ {:,.2f}",
-    "Caixa Acumulado": "R$ {:,.2f}",
-    "Patrimônio Usinas": "R$ {:,.2f}",
-    "Valor Total Negócio": "R$ {:,.2f}"
-}), use_container_width=True, height=250)
+# =================
