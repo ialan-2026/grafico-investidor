@@ -136,7 +136,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Definição automática do ritmo com base no perfil escolhido
+# Definição do ritmo com base no perfil escolhido
 if "Conservador" in perfil:
     meses_para_nova_usina = 12  
 elif "Agressivo" in perfil:
@@ -144,27 +144,52 @@ elif "Agressivo" in perfil:
 else:
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
-# 5. Motor Inteligente de Engenharia Financeira e Quitações
+# 5. NOVO MOTOR: Engenharia Financeira de Amortização Invertida
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
+
+# Rastreamento dinâmico: {id_usina: {"parcelas_restantes": 60, "primeiras_12_pagas": False, "meses_sem_pagar": 0}}
+# Nota: A primeira usina (Usina 1) entra como quitada pelo aporte inicial, dívidas iniciam nas expansões.
 financiamentos = {}
 id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
-    # Gatilho de expansão das usinas financiadas
+    # Gatilho de expansão das usinas financiadas (Até o limite de 5 anos / 60 meses)
     if m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
         id_usina_atual += 1
-        financiamentos[id_usina_atual] = 60  # Nova dívida de 60 parcelas
+        financiamentos[id_usina_atual] = {
+            "parcelas_restantes": 60,
+            "primeiras_12_pagas": False,
+            "meses_sem_pagar": 0
+        }
 
-    # Conta parcelas a vencer no mês atual
-    parcelas_ativas_no_mes = len([k for k, v in financiamentos.items() if v > 0])
-    
+    # MOTOR DE QUITAÇÃO DAS 12 PRIMEIRAS PARCELAS EM CASCATA INVERTIDA
+    if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
+        for id_u in sorted(financiamentos.keys()):
+            if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] == 60:
+                custo_12_parcelas_antecipadas = 12 * (custo_parcela_banco * 0.85)
+                
+                if caixa_acumulado >= custo_12_parcelas_antecipadas:
+                    caixa_acumulado -= custo_12_parcelas_antecipadas
+                    financiamentos[id_u]["primeiras_12_pagas"] = True
+                    financiamentos[id_u]["parcelas_restantes"] -= 12
+                    financiamentos[id_u]["meses_sem_pagar"] = 12  # Ativa carência de 12 meses
+                    break  # Executa uma quitação por lote mensal para segurança do fluxo
+
+    # Calcular custo operacional real consolidado do mês corrente
+    custo_parcelas_no_mes = 0
+    for id_u in financiamentos.keys():
+        if financiamentos[id_u]["parcelas_restantes"] > 0:
+            if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
+                custo_parcelas_no_mes += 0  # Isenção de fluxo ganha pela amortização antecipada
+            else:
+                custo_parcelas_no_mes += custo_parcela_banco
+
     faturamento_bruto = usinas_ativas * faturamento_por_usina
-    custo_parcelas = parcelas_ativas_no_mes * custo_parcela_banco
-    lucro_liquido_empresa = faturamento_bruto - custo_parcelas
+    lucro_liquido_empresa = faturamento_bruto - custo_parcelas_no_mes
     
     saque_investidor = lucro_liquido_empresa * pct_retirada
     retencao_caixa = lucro_liquido_empresa - saque_investidor
@@ -172,33 +197,22 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # MOTOR DE QUITAÇÃO ANTECIPADA (Abate de trás para frente com desconto estrutural)
-    if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
-        for id_u in sorted(financiamentos.keys()):
-            parcelas_restantes = financiamentos[id_u]
-            if parcelas_restantes > 0:
-                saldo_devedor_com_desconto = parcelas_restantes * (custo_parcela_banco * 0.85)
-                
-                if caixa_acumulado >= saldo_devedor_com_desconto:
-                    caixa_acumulado -= saldo_devedor_com_desconto
-                    financiamentos[id_u] = 0  # Dívida zerada!
-                    break  # Limita a 1 quitação por mês para resguardar caixa
-
-    # Amortização temporal padrão
+    # Consumir tempo de contrato dos financiamentos em andamento
     for id_u in financiamentos.keys():
-        if financiamentos[id_u] > 0:
-            financiamentos[id_u] -= 1
+        if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
+            financiamentos[id_u]["meses_sem_pagar"] -= 1  # Consome carência conquistada
+        elif financiamentos[id_u]["parcelas_restantes"] > 0:
+            financiamentos[id_u]["parcelas_restantes"] -= 1  # Amortização temporal padrão
 
     patrimonio_ativos = usinas_ativas * 300000
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
-    # Montagem estável do histórico de auditoria
     data.append({
         "Mês": m,
         "Usinas": usinas_ativas,
         "Faturamento Bruto": faturamento_bruto,
-        "Parcelas Banco": len([k for k, v in financiamentos.items() if v > 0]) * custo_parcela_banco,
-        "Lucro Líquido": faturamento_bruto - (len([k for k, v in financiamentos.items() if v > 0]) * custo_parcela_banco),
+        "Parcelas Banco": custo_parcelas_no_mes,
+        "Lucro Líquido": lucro_liquido_empresa,
         "Saque Mensal": saque_investidor,
         "Caixa Acumulado": caixa_acumulado,
         "Patrimônio Usinas": patrimonio_ativos,
@@ -208,7 +222,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# Configuração Padrão de Design Gráfico (Estilo TradingView)
+# Configuração de Design Gráfico (Estilo TradingView)
 layout_charts = dict(
     paper_bgcolor='#131722', plot_bgcolor='#131722',
     font=dict(color='#787b86', size=10),
