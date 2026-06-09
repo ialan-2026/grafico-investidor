@@ -52,7 +52,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Letreiro com códigos atualizados para o padrão B3 e NYSEARCA)
+# 3. Faixa Superior 100% Homologada (Ativos estáveis que garantem o Auto Scroll sem travar)
 ticker_html = """
 <!DOCTYPE html>
 <html>
@@ -69,18 +69,16 @@ ticker_html = """
   {
   "symbols": [
     {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "B3:IBOV", "title": "IBOVESPA"},
+    {"proName": "NYSE:EWZ", "title": "IBOVESPA (EWZ ETF)"},
     {"proName": "NYSE:EBR", "title": "ENERGIA BR (ELET3)"},
-    {"proName": "NYSEARCA:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (NEE)"},
-    {"proName": "B3:PETR4", "title": "PETROBRAS (PETR4)"},
-    {"proName": "B3:VALE3", "title": "VALE S.A. (VALE3)"},
+    {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
+    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (SOLAR)"},
     {"proName": "BINANCE:BTCUSDT", "title": "BITCOIN (BTC)"}
   ],
   "showSymbolLogo": true, 
   "colorTheme": "dark", 
   "isTransparent": true, 
-  "displayMode": "adaptive",
+  "displayMode": "regular",
   "locale": "br"
 }
   </script>
@@ -118,10 +116,10 @@ pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 1
 
 if perfil == "Conservador Escalável":
     meses_para_nova_usina = 12
-    st.sidebar.info("ℹbox Frequência travada em 12 meses para o perfil Conservador.")
+    st.sidebar.info("ℹ️ Frequência travada em 12 meses para o perfil Conservador.")
 elif perfil == "Agressivo Bimestral":
     meses_para_nova_usina = 2
-    st.sidebar.info("ℹbox Frequência travada em 2 meses para o perfil Agressivo.")
+    st.sidebar.info("ℹ️ Frequência travada em 2 meses para o perfil Agressivo.")
 else:
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
