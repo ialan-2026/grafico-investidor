@@ -52,37 +52,53 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior Estática Otimizada (Apenas os 3 principais ativos que cabem com folga)
+# 3. Faixa Superior Avançada (Flexbox de blocos individuais - Sem risco de duplicação)
 ticker_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; width: 100vw; }
-        .tradingview-widget-container { width: 100% !important; }
+        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }
+        .ticker-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100vw;
+            gap: 15px;
+            padding: 2px 15px;
+            box-sizing: border-box;
+        }
+        .ticker-box {
+            flex: 1;
+            height: 46px;
+            background-color: #131722;
+            border: 1px solid #2a2e39;
+            border-radius: 4px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
-<div class="tradingview-widget-container">
-  <div class="tradingview-widget-container__widget"></div>
-  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-  {
-  "symbols": [
-    {"proName": "FX_IDC:USDBRL", "title": "DÓLAR COMERCIAL"},
-    {"proName": "AMEX:TAN", "title": "SOLAR ETF GLOBAL (TAN)"},
-    {"proName": "NYSE:NEE", "title": "NEXTERA ENERGY (LÍDER SOLAR)"}
-  ],
-  "showSymbolLogo": true, 
-  "colorTheme": "dark", 
-  "isTransparent": true, 
-  "locale": "br"
-}
-  </script>
+<div class="ticker-container">
+    <div class="ticker-box">
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+        {"symbol": "FX_IDC:USDBRL", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+        </script>
+    </div>
+    <div class="ticker-box">
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+        {"symbol": "AMEX:TAN", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+        </script>
+    </div>
+    <div class="ticker-box">
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-ticker.js" async>
+        {"symbol": "NYSE:NEE", "colorTheme": "dark", "isTransparent": true, "locale": "br"}
+        </script>
+    </div>
 </div>
 </body>
 </html>
 """
-components.html(ticker_html, height=48)
+components.html(ticker_html, height=52)
 
 # --- BARRA DE COMANDO INTEGRADA ---
 fuso_brasil = timezone(timedelta(hours=-3))
