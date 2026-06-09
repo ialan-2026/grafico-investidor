@@ -8,7 +8,7 @@ import streamlit.components.v1 as components
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e evita sobreposição do cabeçalho)
+# 2. CSS Avançado e Seguro (Garante visual escuro e mantém a seta de abrir/fechar o menu ativa)
 st.markdown("""
     <style>
     /* CORREÇÃO DO CABEÇALHO: Adicionado padding-top de 50px para empurrar o app para baixo do menu fixo */
@@ -53,13 +53,14 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. Faixa Superior (Letreiro Rolante Ativo - Adicionado mais ativos para forçar a rotação)
+# 3. Faixa Superior Isolada em HTML Puro (Garante a largura de 100% para ativar o Auto Scroll)
 ticker_html = """
 <!DOCTYPE html>
 <html>
 <head>
     <style>
-        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; }
+        body { margin: 0; padding: 0; background-color: #0c0f16; overflow: hidden; width: 100%; }
+        .tradingview-widget-container { width: 100% !important; }
     </style>
 </head>
 <body>
@@ -98,13 +99,16 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# 4. Painel Lateral (Configuração com Carregamento de Logo Corporativa)
+# 4. Painel Lateral (Configuração com redução e centralização da Logo)
 try:
-    st.sidebar.image("logo.jpg", use_container_width=True)
+    # Criando subcolunas internas na barra lateral para reduzir o tamanho da logo com margens limpas
+    side_col1, side_col2, side_col3 = st.sidebar.columns([1, 4, 1])
+    with side_col2:
+        st.image("logo.jpg", use_container_width=True)
 except:
     st.sidebar.markdown("<div style='text-align:center; color:#ff4b4b; font-size:0.8rem; margin-bottom:10px;'>⚠️ Faça upload do arquivo logo.jpg no GitHub</div>", unsafe_allow_html=True)
 
-st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:-10px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
+st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=300000, step=50000)
 faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=7000, step=500)
