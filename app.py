@@ -7,10 +7,9 @@ from datetime import datetime, timezone, timedelta
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e corrige o recuo para os cards aparecerem)
+# 2. CSS Avançado e Seguro (Garante visual escuro e o recuo correto para os cards)
 st.markdown("""
     <style>
-    /* CORREÇÃO CRÍTICA: Aumentado para 80px para tirar os cards de trás do cabeçalho oculto */
     .block-container { padding: 80px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
     
     /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
@@ -21,7 +20,7 @@ st.markdown("""
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
     
-    /* Design do Novo Cabeçalho Financeiro Proprietário */
+    /* Design do Cabeçalho Financeiro Proprietário */
     .market-header-container {
         display: flex;
         justify-content: space-between;
@@ -85,7 +84,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 3. CABEÇALHO PROPRIETÁRIO SANTO HOUSE (Posicionado corretamente fora da zona oculta)
+# 3. CABEÇALHO PROPRIETÁRIO SANTO HOUSE
 st.markdown("""
     <div class="market-header-container">
         <div class="market-card">
@@ -107,13 +106,13 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown(f"""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.7 // BENCHMARK INDEX COMPONENT</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v3.8 // DYNAMIC CAPITAL ENGINE</div>
         <div>SYS TIME: <b>{datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
 """, unsafe_allow_html=True)
 
-# 4. Painel Lateral (Configuração com redução e centralização da Logo)
+# 4. Painel Lateral (Configuração de Inputs e Estratégia de Caixa)
 try:
     side_col1, side_col2, side_col3 = st.sidebar.columns([1, 4, 1])
     with side_col2:
@@ -123,64 +122,111 @@ except:
 
 st.sidebar.markdown("<h3 style='color:#3b82f6; text-align:center; margin-top:5px;'>⚙️ MODELAGEM FINANCEIRA</h3>", unsafe_allow_html=True)
 perfil = st.sidebar.selectbox("Perfil do Investidor", ["Conservador Escalável", "Agressivo Bimestral", "Customizado"])
-aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=300000, step=50000)
-faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=7000, step=500)
+aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=50000)
+faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-if perfil == "Conservador Escalável":
+# Seletor de Estratégia Reativa
+st.sidebar.markdown("---")
+st.sidebar.markdown("<h4 style='color:#cbd5e1; margin-bottom: 2px;'>🎯 Alocação do Caixa</h4>", unsafe_allow_html=True)
+estrategia_caixa = st.sidebar.radio(
+    "O que fazer com os 70% retidos?",
+    ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
+)
+
+# Mapeamento do ritmo com base na variável 'perfil' da sidebar
+if "Conservador" in perfil:
     meses_para_nova_usina = 12
-    st.sidebar.info("ℹ️ Frequência travada em 12 meses para o perfil Conservador.")
-elif perfil == "Agressivo Bimestral":
+elif "Agressivo" in perfil:
     meses_para_nova_usina = 2
-    st.sidebar.info("ℹ️ Frequência travada em 2 meses para o perfil Agressivo.")
 else:
+    st.sidebar.markdown("---")
     meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
 
-# 5. Lógica da Engenharia Financeira
+# 5. MOTOR DE CÁLCULO ATUALIZADO E FLEXÍVEL
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
 
+# Rastreamento dinâmico do passivo bancário
+financiamentos = {}
+id_usina_atual = 1
+
 for m in range(1, months_projection + 1):
+    
+    # Ativação de novas usinas escaladas (Até o limite de 5 anos / 60 meses)
     if m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         usinas_ativas += 1
-        
-    parcelas_ativas = 0
-    for u in range(1, usinas_ativas):
-        mes_compra_usina = 1 + (u * meses_para_nova_usina)
-        if m >= mes_compra_usina and m < (mes_compra_usina + 60):
-            parcelas_ativas += 1
+        id_usina_atual += 1
+        financiamentos[id_usina_atual] = {
+            "parcelas_restantes": 60,
+            "primeiras_12_pagas": False,
+            "meses_sem_pagar": 0
+        }
 
+    # SELEÇÃO DA ESTRATÉGIA DE ALOCAÇÃO DO CAIXA DO MENU LATERAL
+    if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
+        for id_u in sorted(financiamentos.keys()):
+            # CORREÇÃO CRÍTICA: Se a usina tem pelo menos 12 parcelas a vencer, ela pode sofrer abatimento a qualquer momento
+            if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
+                custo_12_parcelas_antecipadas = 12 * (custo_parcela_banco * 0.85)
+                
+                if caixa_acumulado >= custo_12_parcelas_antecipadas:
+                    caixa_acumulado -= custo_12_parcelas_antecipadas
+                    financiamentos[id_u]["primeiras_12_pagas"] = True
+                    financiamentos[id_u]["parcelas_restantes"] -= 12
+                    financiamentos[id_u]["meses_sem_pagar"] = 12 # Isenção de parcelas por 12 meses garantida
+                    break # Executa um lote de amortização por mês para resguardar a saúde financeira
+
+    # Cálculo dinâmico do custo de boletos ativos que restaram para este mês específico
+    custo_parcelas_no_mes = 0
+    for id_u in financiamentos.keys():
+        if financiamentos[id_u]["parcelas_restantes"] > 0:
+            if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
+                custo_parcelas_no_mes += 0 # Custos liquidados antecipadamente
+            else:
+                custo_parcelas_no_mes += custo_parcela_banco
+
+    # Consolidação do Fluxo de Caixa da holding
     faturamento_bruto = usinas_ativas * faturamento_por_usina
-    custo_parcelas = parcelas_ativas * custo_parcela_banco
-    lucro_liquido_empresa = faturamento_bruto - custo_parcelas
+    lucro_liquido_empresa = faturamento_bruto - custo_parcelas_no_mes
     
     saque_investidor = lucro_liquido_empresa * pct_retirada
     retencao_caixa = lucro_liquido_empresa - saque_investidor
     
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
+
+    # Atualização dos cronogramas de tempo para o próximo mês do loop
+    for id_u in financiamentos.keys():
+        if financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["meses_sem_pagar"] > 0:
+            financiamentos[id_u]["meses_sem_pagar"] -= 1 # Consome o lote antecipado
+        elif financiamentos[id_u]["parcelas_restantes"] > 0:
+            financiamentos[id_u]["parcelas_restantes"] -= 1 # Consome o contrato padrão a partir do mês 13
+
+    # Variáveis de saída patrimoniais
     patrimonio_ativos = usinas_ativas * 300000
-    
+    valor_total_holding = caixa_acumulado + patrimonio_ativos
+
     data.append({
         "Mês": m,
         "Usinas": usinas_ativas,
         "Faturamento Bruto": faturamento_bruto,
-        "Parcelas Banco": custo_parcelas,
+        "Parcelas Banco": custo_parcelas_no_mes,
         "Lucro Líquido": lucro_liquido_empresa,
         "Saque Mensal": saque_investidor,
         "Caixa Acumulado": caixa_acumulado,
         "Patrimônio Usinas": patrimonio_ativos,
-        "Valor Total Negócio": caixa_acumulado + patrimonio_ativos
+        "Valor Total Negócio": valor_total_holding
     })
 
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# Configuração Padrão das Telas do TradingView (Gráficos)
+# Configuração Padrão de Design Gráfico (Estilo TradingView)
 layout_charts = dict(
     paper_bgcolor='#131722', plot_bgcolor='#131722',
     font=dict(color='#787b86', size=10),
@@ -197,9 +243,7 @@ def render_metric_card(label, value, color_class):
         </div>
     """, unsafe_allow_html=True)
 
-# =========================================================
-# LINHA 1: METRICAS PRINCIPAIS
-# =========================================================
+# --- LINHA 1: METRICAS PRINCIPAIS ---
 col_m1, col_m2, col_m3 = st.columns(3)
 with col_m1:
     render_metric_card("Valor Total do Negócio (Holding)", f"R$ {retorno_solar_total:,.2f}", "neon-green")
@@ -210,9 +254,7 @@ with col_m3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# =========================================================
-# LINHA 2: GRÁFICOS LADO A LADO
-# =========================================================
+# --- LINHA 2: RENDIMENTOS GRÁFICOS ---
 row2_col1, row2_col2 = st.columns(2)
 
 with row2_col1:
@@ -234,9 +276,7 @@ with row2_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# =========================================================
-# LINHA 3: COMPARATIVO MERCADO + TEXTO ESTRATÉGICO
-# =========================================================
+# --- LINHA 3: DESTRUIÇÃO DE CONCORRÊNCIA E INSIGHTS ---
 row3_col1, row3_col2 = st.columns([1.2, 1])
 
 with row3_col1:
@@ -273,9 +313,7 @@ with row3_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# =========================================================
-# LINHA 4: TABELA MÊS A MÊS
-# =========================================================
+# --- LINHA 4: TABELA MÊS A MÊS ---
 st.markdown('<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>', unsafe_allow_html=True)
 st.dataframe(df.style.format({
     "Faturamento Bruto": "R$ {:,.2f}",
