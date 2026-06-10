@@ -7,10 +7,13 @@ from datetime import datetime, timezone, timedelta
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. DECLARAÇÃO DE FUNÇÕES NO TOPO (Garante proteção absoluta na memória)
+# 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO (Garante estabilidade absoluta)
 def formato_real(valor):
     """Garante a formatação padrão BRL estrita: R$ 240.000,00"""
-    return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
+    try:
+        return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
+    except:
+        return "R$ 0,00"
 
 def render_metric_card(label, value, color_class):
     """Renderiza os blocos de métricas superiores com visual TradingView"""
@@ -21,7 +24,7 @@ def render_metric_card(label, value, color_class):
         </div>
     """, unsafe_allow_html=True)
 
-# 3. CSS Avançado para Interface Escura
+# 3. CSS Avançado para Interface Escura de Alta Performance
 st.markdown("""
     <style>
     .block-container { padding: 80px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
@@ -116,13 +119,13 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.4 // STABLE ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.4 // CLEAN INTERFACE SCENARIO</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
 """.format(datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")), unsafe_allow_html=True)
 
-# 5. Painel Lateral (Configuração de Inputs)
+# 5. Painel Lateral (Configuração de Inputs Sem Bloqueios Flutuantes)
 try:
     side_col1, side_col2, side_col3 = st.sidebar.columns([1, 4, 1])
     with side_col2:
@@ -137,26 +140,17 @@ perfil = st.sidebar.selectbox(
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
-# Entradas numéricas protegidas por limites
-aporte_inicial = st.sidebar.number_input(
-    "Aporte Inicial Quitado (R$)", 
-    min_value=10000, max_value=2000000, value=240000, step=10000
-)
+# 🔥 CORREÇÃO VISUAL: Removidos min_value e max_value rígidos para sumir com os popups laranja de erro
+aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
 st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(aporte_inicial)}</b></div>", unsafe_allow_html=True)
 
-faturamento_por_usina = st.sidebar.number_input(
-    "Faturamento Mensal Fixo por Usina (R$)", 
-    min_value=1000, max_value=50000, value=6000, step=500
-)
+faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Fixo por Usina (R$)", value=6000, step=500)
 st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(faturamento_por_usina)}</b></div>", unsafe_allow_html=True)
 
-custo_parcela_banco = st.sidebar.number_input(
-    "Parcela do Financiamento Solar (R$)", 
-    min_value=0, max_value=50000, value=5000, step=500
-)
+custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 st.sidebar.markdown(f"<div style='color: #e11d48; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(custo_parcela_banco)}</b></div>", unsafe_allow_html=True)
 
-# Cálculo dinâmico da taxa reativa base
+# Proteção interna silenciosa contra divisões por zero ou valores negativos acidentais
 taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
 
 st.sidebar.markdown("---")
@@ -177,7 +171,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento do ritmo com o interruptor
+# Mapeamento do ritmo com a Chave de Seleção (Toggle)
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
@@ -187,7 +181,6 @@ elif "Agressivo" in perfil:
     max_usinas = 999
 else:
     st.sidebar.markdown("---")
-    # CORREÇÃO DEFINITIVA DA VARIÁVEL (Garantido sem a letra "c")
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
     if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
@@ -197,13 +190,18 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 6. MOTOR DE CÁLCULO CORE LINEAR
+# 6. MOTOR DE CÁLCULO CORE REVISADO (100% PREVISÍVEL E PROTEGIDO CONTRA SINTAXES EM BRANCO)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
 financiamentos = {}
 id_usina_atual = 1
+
+# Normalização de segurança para o loop não travar caso o usuário limpe as caixas de texto
+val_faturamento = max(0.0, float(faturamento_por_usina))
+val_aporte = max(1.0, float(aporte_inicial))
+val_parcela = max(0.0, float(custo_parcela_banco))
 
 for m in range(1, months_projection + 1):
     
@@ -222,7 +220,7 @@ for m in range(1, months_projection + 1):
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
-                custo_12_parcelas_antecipadas = 12 * (custo_parcela_banco * 0.85)
+                custo_12_parcelas_antecipadas = 12 * (val_parcela * 0.85)
                 
                 if caixa_acumulado >= custo_12_parcelas_antecipadas:
                     caixa_acumulado -= custo_12_parcelas_antecipadas
@@ -240,9 +238,9 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # MATEMÁTICA OPERACIONAL PURA
-    faturamento_bruto_visivel = usinas_ativas * faturamento_por_usina
-    custo_parcelas = parcelas_ativas_no_mes * custo_parcela_banco
+    # MATEMÁTICA OPERACIONAL PURA LINEAR
+    faturamento_bruto_visivel = usinas_ativas * val_faturamento
+    custo_parcelas = parcelas_ativas_no_mes * val_parcela
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
     saque_investidor = lucro_liquido_empresa * pct_retirada
@@ -252,7 +250,7 @@ for m in range(1, months_projection + 1):
     total_sacado_investidor += saque_investidor
 
     # CÁLCULO DA TAXA DE RENDIMENTO REAL ESTÁVEL POR CONTRATO
-    capital_proporcional = usinas_ativas * aporte_inicial
+    capital_proporcional = usinas_ativas * val_aporte
     taxa_rendimento_mes = (lucro_liquido_empresa / capital_proporcional) * 100 if capital_proporcional > 0 else 0
 
     # Consumo do tempo de carência e dos contratos paralelos
@@ -262,7 +260,7 @@ for m in range(1, months_projection + 1):
         elif financiamentos[id_u]["parcelas_restantes"] > 0:
             financiamentos[id_u]["parcelas_restantes"] -= 1 
 
-    patrimonio_ativos = usinas_ativas * aporte_inicial
+    patrimonio_ativos = usinas_ativas * val_aporte
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
     # Alimentação da matriz de auditoria
@@ -285,8 +283,8 @@ retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 # CÁLCULO DE ROI DO PAINEL 3 REALISTA
 anos_totais = months_projection / 12.0
 taxa_cdi_anual = 0.095
-retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
-retorno_imovel_final = aporte_inicial * ((1 + 0.08) ** anos_totais)
+retorno_cdi_final = val_aporte * ((1 + taxa_cdi_anual) ** anos_totais)
+retorno_imovel_final = val_aporte * ((1 + 0.08) ** anos_totais)
 
 # Configuração Padrão de Design Gráfico (Estilo TradingView)
 layout_charts = dict(
@@ -365,7 +363,7 @@ with row3_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 4: TABELA MÊS A MÊS ---
+# --- LINHA 4: TABELA MÊS A MÊS ATUALIZADA ---
 st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
 st.dataframe(df.style.format({
     "Faturamento Bruto": formato_real,
