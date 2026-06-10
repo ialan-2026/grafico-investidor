@@ -84,7 +84,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 🔥 FUNÇÃO DE TRATAMENTO MONETÁRIO: Garante o padrão estrito de pontuação BRL (R$ 240.000,00)
+# FUNÇÃO DE TRATAMENTO MONETÁRIO: Garante o padrão estrito de pontuação BRL (R$ 240.000,00)
 def formato_real(valor):
     return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
 
@@ -110,7 +110,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.2 // AUDITED PERFORMANCE ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.3 // SAFE GUARD SHIELD</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -131,9 +131,30 @@ perfil = st.sidebar.selectbox(
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
-aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
-faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Fixo por Usina (R$)", value=6000, step=500)
-custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
+# 🚀 TRAVAS DE SEGURANÇA MÁXIMA APLICADAS (max_value impede a explosão de zeros e loops de erro)
+aporte_inicial = st.sidebar.number_input(
+    "Aporte Inicial Quitado (R$)", 
+    min_value=10000, 
+    max_value=2000000,  # Trava eletrônica em R$ 2 Milhões (Evita os 24 milhões acidentais)
+    value=240000, 
+    step=10000
+)
+
+faturamento_por_usina = st.sidebar.number_input(
+    "Faturamento Mensal Fixo por Usina (R$)", 
+    min_value=1000, 
+    max_value=50000,   # Trava eletrônica em R$ 50 mil por usina
+    value=6000, 
+    step=500
+)
+
+custo_parcela_banco = st.sidebar.number_input(
+    "Parcela do Financiamento Solar (R$)", 
+    min_value=0, 
+    max_value=50000,    # Trava eletrônica em R$ 50 mil
+    value=5000, 
+    step=500
+)
 
 # Cálculo dinâmico e exato da taxa reativa base
 taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
@@ -185,7 +206,7 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansão patrimonial (Até o limite de 5 anos / 60 meses)
+    # Gatilho condicional de expansion patrimonial (Até o limite de 5 anos / 60 meses)
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -275,22 +296,15 @@ layout_charts = dict(
     margin=dict(l=45, r=15, t=15, b=25), hovermode='x unified'
 )
 
-def render_metric_card(label, value, color_class):
-    st.markdown(f"""
-        <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; padding: 15px; text-align: center;">
-            <div style="color: #787b86; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{label}</div>
-            <div class="{color_class}" style="font-size: 2rem; font-weight: bold; margin-top: 5px;">{value}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-# --- LINHA 1: METRICAS PRINCIPAIS ATUALIZADAS COM PONTUAÇÃO PT-BR ---
-col_m1, col_m2, col_m3 = st.columns(3)
-with col_m1:
-    render_metric_card("Caixa Livre na Empresa (70%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
-with col_m2:
-    render_metric_card("Dinheiro Sacado para o Bolso (30%)", formato_real(total_sacado_investidor), "neon-blue")
-with col_m3:
-    render_metric_card("Valor Total da Holding (Usinas + Caixa)", formato_real(retorno_solar_total), "neon-purple")
+with st.container():
+    # --- LINHA 1: METRICAS PRINCIPAIS ATUALIZADAS COM PONTUAÇÃO PT-BR ---
+    col_m1, col_m2, col_m3 = st.columns(3)
+    with col_m1:
+        render_metric_card("Caixa Livre na Empresa (70%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
+    with col_m2:
+        render_metric_card("Dinheiro Sacado para o Bolso (30%)", formato_real(total_sacado_investidor), "neon-blue")
+    with col_m3:
+        render_metric_card("Valor Total da Holding (Usinas + Caixa)", formato_real(retorno_solar_total), "neon-purple")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -352,7 +366,6 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # --- LINHA 4: TABELA MÊS A MÊS ATUALIZADA (REMOCAO DE INDEX E FORMATACAO BR) ---
 st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
-# 🔥 AJUSTADO: Passando a função formato_real e o parâmetro hide_index=True para cimentar as correções visuais
 st.dataframe(df.style.format({
     "Faturamento Bruto": formato_real,
     "Parcelas Banco": formato_real,
