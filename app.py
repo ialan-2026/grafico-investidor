@@ -4,14 +4,18 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timezone, timedelta
 
-# 1. Configurar página em modo super-largo (Fullscreen)
+# 1. Configurar página em modo super-largo (Fullscreen) - Deve ser sempre o primeiro comando
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO
+# =========================================================================
+# 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO (Evita qualquer erro de NameError)
+# =========================================================================
 def formato_real(valor):
+    """Garante a formatação padrão BRL estrita: R$ 240.000,00"""
     return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
 
 def render_metric_card(label, value, color_class):
+    """Renderiza os blocos de métricas superiores com visual TradingView"""
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; padding: 15px; text-align: center;">
             <div style="color: #787b86; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{label}</div>
@@ -19,12 +23,10 @@ def render_metric_card(label, value, color_class):
         </div>
     """, unsafe_allow_html=True)
 
-# 3. CSS Avançado e Seguro (Garante visual escuro e o recuo correto para os cards)
+# 3. CSS Avançado e Seguro para Interface Escura
 st.markdown("""
     <style>
     .block-container { padding: 80px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
-    
-    /* Ajusta o cabeçalho nativo para o tom exato do fundo sem quebrar os botões da barra lateral */
     header[data-testid="stHeader"] { 
         background-color: #0c0f16 !important; 
         height: 50px !important;
@@ -32,7 +34,6 @@ st.markdown("""
     footer { visibility: hidden !important; }
     .stApp { background-color: #0c0f16; font-family: 'Consolas', monospace; }
     
-    /* Design do Cabeçalho Financeiro Proprietário */
     .market-header-container {
         display: flex;
         justify-content: space-between;
@@ -65,7 +66,6 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Estilos das faixas e textos neon */
     .command-bar {
         background-color: #131722;
         border: 1px solid #2a2e39;
@@ -139,7 +139,7 @@ perfil = st.sidebar.selectbox(
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
-# 🚀 ESTRUTURA ATUALIZADA: Entradas numéricas com espelhos de validação em tempo real abaixo
+# Entradas numéricas protegidas por travas eletrônicas de limite máximo
 aporte_inicial = st.sidebar.number_input(
     "Aporte Inicial Quitado (R$)", 
     min_value=10000, max_value=2000000, value=240000, step=10000
@@ -190,7 +190,7 @@ elif "Agressivo" in perfil:
 else:
     st.sidebar.markdown("---")
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
-    if ativar_expansao:
+    if activar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
         max_usinas = st.sidebar.slider("Quantidade Máxima Total de Usinas", 1, 30, 5)
     else:
@@ -198,7 +198,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 6. MOTOR DE CÁLCULO CORE REVISADO
+# 6. MOTOR DE CÁLCULO CORE REVISADO (Linear, sem oscilações)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
