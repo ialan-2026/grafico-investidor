@@ -84,6 +84,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# 🔥 FUNÇÃO DE TRATAMENTO MONETÁRIO: Garante o padrão estrito de pontuação BRL (R$ 240.000,00)
+def formato_real(valor):
+    return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
+
 # 3. CABEÇALHO PROPRIETÁRIO SANTO HOUSE
 st.markdown("""
     <div class="market-header-container">
@@ -279,19 +283,14 @@ def render_metric_card(label, value, color_class):
         </div>
     """, unsafe_allow_html=True)
 
-# =========================================================
-# CORREÇÃO CRÍTICA: LINHA 1 COM AUDITORIA TOTAL TRANSPARENTE
-# =========================================================
+# --- LINHA 1: METRICAS PRINCIPAIS ATUALIZADAS COM PONTUAÇÃO PT-BR ---
 col_m1, col_m2, col_m3 = st.columns(3)
 with col_m1:
-    # Exibe puramente o caixa líquido que ficou acumulado dentro da conta da holding
-    render_metric_card("Caixa Livre na Empresa (70%)", f"R$ {df['Caixa Acumulado'].iloc[-1]:,.2f}", "neon-green")
+    render_metric_card("Caixa Livre na Empresa (70%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
 with col_m2:
-    # Exibe o dinheiro real que já pingou limpo na conta corrente pessoal do investidor
-    render_metric_card("Dinheiro Sacado para o Bolso (30%)", f"R$ {total_sacado_investidor:,.2f}", "neon-blue")
+    render_metric_card("Dinheiro Sacado para o Bolso (30%)", formato_real(total_sacado_investidor), "neon-blue")
 with col_m3:
-    # Deixa explícito no título do card que este valor é a SOMA das Usinas + o Caixa
-    render_metric_card("Valor Total da Holding (Usinas + Caixa)", f"R$ {retorno_solar_total:,.2f}", "neon-purple")
+    render_metric_card("Valor Total da Holding (Usinas + Caixa)", formato_real(retorno_solar_total), "neon-purple")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -351,14 +350,15 @@ with row3_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 4: TABELA MÊS A MÊS ---
+# --- LINHA 4: TABELA MÊS A MÊS ATUALIZADA (REMOCAO DE INDEX E FORMATACAO BR) ---
 st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
+# 🔥 AJUSTADO: Passando a função formato_real e o parâmetro hide_index=True para cimentar as correções visuais
 st.dataframe(df.style.format({
-    "Faturamento Bruto": "R$ {:,.2f}",
-    "Parcelas Banco": "R$ {:,.2f}",
-    "Lucro Líquido": "R$ {:,.2f}",
-    "Saque Mensal": "R$ {:,.2f}",
-    "Caixa Acumulado": "R$ {:,.2f}",
-    "Patrimônio Usinas": "R$ {:,.2f}",
-    "Valor Total Negócio": "R$ {:,.2f}"
-}), use_container_width=True, height=250)
+    "Faturamento Bruto": formato_real,
+    "Parcelas Banco": formato_real,
+    "Lucro Líquido": formato_real,
+    "Saque Mensal": formato_real,
+    "Caixa Acumulado": formato_real,
+    "Patrimônio Usinas": formato_real,
+    "Valor Total Negócio": formato_real
+}), use_container_width=True, height=250, hide_index=True)
