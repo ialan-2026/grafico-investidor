@@ -80,7 +80,7 @@ st.markdown("""
     }
     .neon-green { color: #10b981; text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
     .neon-blue { color: #3b82f6; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-    .neon-purple { color: #a78bfa; text-shadow: 0 0 10px rgba(167, 139, 250, 0.3); }
+    .neon-purple { color: #ff9f43; text-shadow: 0 0 10px rgba(255, 159, 67, 0.3); }
     </style>
 """, unsafe_allow_html=True)
 
@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // 10-YEAR HORIZON TUNING</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.2 // AUDITED PERFORMANCE ENGINE</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -141,9 +141,7 @@ st.sidebar.metric(
     delta="Garantido no Repasse"
 )
 
-# 🚀 RESTAURADO COM TRAVA: O Slider voltou para a tela, mas agora limitado rigorosamente de 12 até 120 meses!
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 120, step=12)
-
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
 # Seletor de Estratégia Reativa
@@ -173,7 +171,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE REVISADO (DINÂMICO ATÉ O LIMITE DO SLIDER FIXADO)
+# 5. MOTOR DE CÁLCULO CORE REVISADO (100% PREVISÍVEL E ALINHADO)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -281,14 +279,19 @@ def render_metric_card(label, value, color_class):
         </div>
     """, unsafe_allow_html=True)
 
-# --- LINHA 1: METRICAS PRINCIPAIS ---
+# =========================================================
+# CORREÇÃO CRÍTICA: LINHA 1 COM AUDITORIA TOTAL TRANSPARENTE
+# =========================================================
 col_m1, col_m2, col_m3 = st.columns(3)
 with col_m1:
-    render_metric_card("Valor Total do Negócio (Holding)", f"R$ {retorno_solar_total:,.2f}", "neon-green")
+    # Exibe puramente o caixa líquido que ficou acumulado dentro da conta da holding
+    render_metric_card("Caixa Livre na Empresa (70%)", f"R$ {df['Caixa Acumulado'].iloc[-1]:,.2f}", "neon-green")
 with col_m2:
-    render_metric_card("Dinheiro Sacado para o Bolso", f"R$ {total_sacado_investidor:,.2f}", "neon-blue")
+    # Exibe o dinheiro real que já pingou limpo na conta corrente pessoal do investidor
+    render_metric_card("Dinheiro Sacado para o Bolso (30%)", f"R$ {total_sacado_investidor:,.2f}", "neon-blue")
 with col_m3:
-    render_metric_card("Total de Usinas Operando", f"{int(df['Usinas'].iloc[-1])} Usinas", "neon-purple")
+    # Deixa explícito no título do card que este valor é a SOMA das Usinas + o Caixa
+    render_metric_card("Valor Total da Holding (Usinas + Caixa)", f"R$ {retorno_solar_total:,.2f}", "neon-purple")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
