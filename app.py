@@ -7,7 +7,19 @@ from datetime import datetime, timezone, timedelta
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 2. CSS Avançado e Seguro (Garante visual escuro e o recuo correto para os cards)
+# 🔥 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO (Garante proteção total contra NameError)
+def formato_real(valor):
+    return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
+
+def render_metric_card(label, value, color_class):
+    st.markdown(f"""
+        <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 4px; padding: 15px; text-align: center;">
+            <div style="color: #787b86; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">{label}</div>
+            <div class="{color_class}" style="font-size: 2rem; font-weight: bold; margin-top: 5px;">{value}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# 3. CSS Avançado e Seguro (Garante visual escuro e o recuo correto para os cards)
 st.markdown("""
     <style>
     .block-container { padding: 80px 15px 0px 15px !important; max-width: 99% !important; margin: 0 auto !important; }
@@ -84,11 +96,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# FUNÇÃO DE TRATAMENTO MONETÁRIO: Garante o padrão estrito de pontuação BRL (R$ 240.000,00)
-def formato_real(valor):
-    return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
-
-# 3. CABEÇALHO PROPRIETÁRIO SANTO HOUSE
+# 4. CABEÇALHO PROPRIETÁRIO SANTO HOUSE
 st.markdown("""
     <div class="market-header-container">
         <div class="market-card">
@@ -116,7 +124,7 @@ st.markdown("""
     </div>
 """.format(datetime.now(fuso_brasil).strftime("%d/%m/%Y %H:%M:%S")), unsafe_allow_html=True)
 
-# 4. Painel Lateral (Configuração de Inputs e Estratégia de Caixa)
+# 5. Painel Lateral (Configuração de Inputs e Estratégia de Caixa)
 try:
     side_col1, side_col2, side_col3 = st.sidebar.columns([1, 4, 1])
     with side_col2:
@@ -131,11 +139,11 @@ perfil = st.sidebar.selectbox(
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
-# 🚀 TRAVAS DE SEGURANÇA MÁXIMA APLICADAS (max_value impede a explosão de zeros e loops de erro)
+# Travas de segurança eletrónica
 aporte_inicial = st.sidebar.number_input(
     "Aporte Inicial Quitado (R$)", 
     min_value=10000, 
-    max_value=2000000,  # Trava eletrônica em R$ 2 Milhões (Evita os 24 milhões acidentais)
+    max_value=2000000, 
     value=240000, 
     step=10000
 )
@@ -143,7 +151,7 @@ aporte_inicial = st.sidebar.number_input(
 faturamento_por_usina = st.sidebar.number_input(
     "Faturamento Mensal Fixo por Usina (R$)", 
     min_value=1000, 
-    max_value=50000,   # Trava eletrônica em R$ 50 mil por usina
+    max_value=50000, 
     value=6000, 
     step=500
 )
@@ -151,7 +159,7 @@ faturamento_por_usina = st.sidebar.number_input(
 custo_parcela_banco = st.sidebar.number_input(
     "Parcela do Financiamento Solar (R$)", 
     min_value=0, 
-    max_value=50000,    # Trava eletrônica em R$ 50 mil
+    max_value=50000, 
     value=5000, 
     step=500
 )
@@ -196,7 +204,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE REVISADO (100% PREVISÍVEL E ALINHADO)
+# 6. MOTOR DE CÁLCULO CORE REVISADO
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -206,7 +214,7 @@ id_usina_atual = 1
 
 for m in range(1, months_projection + 1):
     
-    # Gatilho condicional de expansion patrimonial (Até o limite de 5 anos / 60 meses)
+    # Gatilho condicional de expansão patrimonial
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -217,7 +225,7 @@ for m in range(1, months_projection + 1):
                 "meses_sem_pagar": 0
             }
 
-    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL (FLEXÍVEL)
+    # SISTEMA DE AMORTIZAÇÃO ANTECIPADA POR LOTES MENSAL
     if estrategia_caixa == "Quitação Acelerada (Abater Bancos)":
         for id_u in sorted(financiamentos.keys()):
             if not financiamentos[id_u]["primeiras_12_pagas"] and financiamentos[id_u]["parcelas_restantes"] >= 12:
@@ -239,7 +247,7 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # MATEMÁTICA OPERACIONAL PURA LINEAR E PREVISÍVEL 
+    # MATEMÁTICA OPERACIONAL PURA LINEAR
     faturamento_bruto_visivel = usinas_ativas * faturamento_por_usina
     custo_parcelas = parcelas_ativas_no_mes * custo_parcela_banco
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
@@ -281,7 +289,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# CÁLCULO DE ROI DO PAINEL 3 REALISTA EM ANOS DINÂMICOS CONFORME O SLIDER
+# CÁLCULO DE ROI DO PAINEL 3 REALISTA
 anos_totais = months_projection / 12.0
 taxa_cdi_anual = 0.095
 retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
@@ -296,8 +304,8 @@ layout_charts = dict(
     margin=dict(l=45, r=15, t=15, b=25), hovermode='x unified'
 )
 
+# --- RENDERIZAÇÃO DA LINHA 1 (MÉTRICAS DO TOPO) ---
 with st.container():
-    # --- LINHA 1: METRICAS PRINCIPAIS ATUALIZADAS COM PONTUAÇÃO PT-BR ---
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1:
         render_metric_card("Caixa Livre na Empresa (70%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
@@ -364,7 +372,7 @@ with row3_col2:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 4: TABELA MÊS A MÊS ATUALIZADA (REMOCAO DE INDEX E FORMATACAO BR) ---
+# --- LINHA 4: TABELA MÊS A MÊS ATUALIZADA ---
 st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
 st.dataframe(df.style.format({
     "Faturamento Bruto": formato_real,
