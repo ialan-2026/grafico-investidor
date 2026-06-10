@@ -7,7 +7,7 @@ from datetime import datetime, timezone, timedelta
 # 1. Configurar página em modo super-largo (Fullscreen)
 st.set_page_config(page_title="Terminal Solar PRO", layout="wide", initial_sidebar_state="expanded")
 
-# 🔥 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO (Garante proteção total contra NameError)
+# 2. DECLARAÇÃO DE FUNÇÕES CRÍTICAS NO TOPO
 def formato_real(valor):
     return f"R$ {valor:,.2f}".replace(',', '_').replace('.', ',').replace('_', '.')
 
@@ -118,7 +118,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.3 // SAFE GUARD SHIELD</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.4 // LIVE CONFIRMATION SHIELD</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -139,30 +139,24 @@ perfil = st.sidebar.selectbox(
     ["Conservador Escalável", "Agressivo Bimestral", "Customizado"]
 )
 
-# Travas de segurança eletrónica
+# 🚀 ESTRUTURA ATUALIZADA: Entradas numéricas com espelhos de validação em tempo real abaixo
 aporte_inicial = st.sidebar.number_input(
     "Aporte Inicial Quitado (R$)", 
-    min_value=10000, 
-    max_value=2000000, 
-    value=240000, 
-    step=10000
+    min_value=10000, max_value=2000000, value=240000, step=10000
 )
+st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(aporte_inicial)}</b></div>", unsafe_allow_html=True)
 
 faturamento_por_usina = st.sidebar.number_input(
     "Faturamento Mensal Fixo por Usina (R$)", 
-    min_value=1000, 
-    max_value=50000, 
-    value=6000, 
-    step=500
+    min_value=1000, max_value=50000, value=6000, step=500
 )
+st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(faturamento_por_usina)}</b></div>", unsafe_allow_html=True)
 
 custo_parcela_banco = st.sidebar.number_input(
     "Parcela do Financiamento Solar (R$)", 
-    min_value=0, 
-    max_value=50000, 
-    value=5000, 
-    step=500
+    min_value=0, max_value=50000, value=5000, step=500
 )
+st.sidebar.markdown(f"<div style='color: #e11d48; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(custo_parcela_banco)}</b></div>", unsafe_allow_html=True)
 
 # Cálculo dinâmico e exato da taxa reativa base
 taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
