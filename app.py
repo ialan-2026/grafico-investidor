@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // SEASONAL PERFORMANCE ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // FIXED PERFORMANCE ENGINE</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -128,10 +128,10 @@ perfil = st.sidebar.selectbox(
 )
 
 aporte_inicial = st.sidebar.number_input("Aporte Inicial Quitado (R$)", value=240000, step=10000)
-faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Inicial por Usina (R$)", value=6000, step=500)
+faturamento_por_usina = st.sidebar.number_input("Faturamento Mensal Fixo por Usina (R$)", value=6000, step=500)
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 
-# 🚀 CORREÇÃO MATEMÁTICA DA TAXA BASE: Agora ela calcula de verdade dividindo o faturamento pelo aporte configurado!
+# Cálculo dinâmico e exato da taxa reativa base
 taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
 
 st.sidebar.markdown("---")
@@ -143,7 +143,8 @@ st.sidebar.metric(
 
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 300, 60, step=12)
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
-taxa_admin_pct = st.sidebar.slider("Taxa de O&M / Adm Santo House (%)", 0, 20, 0, step=1) / 100.0
+
+# REMOVIDO: Controle da Taxa de O&M / Adm solicitado
 
 # Seletor de Estratégia Reativa
 st.sidebar.markdown("---")
@@ -172,33 +173,17 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# --- DEFINIÇÃO DA SAZONALIDADE SOLAR DO BRASIL ---
-sazonalidade_mes = {
-    1: 1.00, 2: 0.95, 3: 0.98, 4: 0.90, 
-    5: 0.85, 6: 0.80, 7: 0.88, 
-    8: 1.20, 9: 1.25, 10: 1.15, 
-    11: 1.05, 12: 1.02
-}
-
-# 5. MOTOR DE CÁLCULO CORE REVISADO (CONTRATOS DE CICLO FECHADO SEM INFLAÇÃO INTERNA)
+# 5. MOTOR DE CÁLCULO CORE REVISADO (100% PREVISÍVEL, SEM SAZONALIDADE E SEM TAXA ADM)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
 usinas_ativas = 1
 financiamentos = {}
 id_usina_atual = 1
-faturamento_dinamico_base = faturamento_por_usina
 
 for m in range(1, months_projection + 1):
     
-    # Identifica o mês do ano corrente (1 a 12) para aplicar o fator de irradiação
-    mes_do_ano = ((m - 1) % 12) + 1
-    fator_solar = sazonalidade_mes[mes_do_ano]
-    
-    # Aplica o fator de sazonalidade sobre o valor fixado em contrato
-    faturamento_reajustado_usina = faturamento_dinamico_base * fator_solar
-
-    # Gatilho condicional de expansão patrimonial
+    # Gatilho condicional de expansão patrimonial (Até o limite de 5 anos / 60 meses)
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
             usinas_ativas += 1
@@ -231,12 +216,10 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # MATEMÁTICA OPERACIONAL AJUSTADA COM SAZONALIDADE E TAXA ADM
-    faturamento_bruto_visivel = usinas_ativas * faturamento_reajustado_usina
-    faturamento_santo_house = faturamento_bruto_visivel * taxa_admin_pct
-    faturamento_liquido_holding = faturamento_bruto_visivel - faturamento_santo_house
+    # MATEMÁTICA PURA LINEAR E PREVISÍVEL (REMOVIDA TOTALMENTE A SAZONALIDADE CLIMÁTICA)
+    faturamento_bruto_visivel = usinas_ativas * faturamento_por_usina
     custo_parcelas = parcelas_ativas_no_mes * custo_parcela_banco
-    lucro_liquido_empresa = faturamento_liquido_holding - custo_parcelas
+    lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
     saque_investidor = lucro_liquido_empresa * pct_retirada
     retencao_caixa = lucro_liquido_empresa - saque_investidor
@@ -244,7 +227,7 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # CÁLCULO DA TAXA DE RENDIMENTO REAL DINÂMICA
+    # CÁLCULO DA TAXA DE RENDIMENTO REAL ESTÁVEL POR CONTRATO
     capital_proporcional = usinas_ativas * aporte_inicial
     taxa_rendimento_mes = (lucro_liquido_empresa / capital_proporcional) * 100 if capital_proporcional > 0 else 0
 
@@ -258,7 +241,7 @@ for m in range(1, months_projection + 1):
     patrimonio_ativos = usinas_ativas * aporte_inicial
     valor_total_holding = caixa_acumulado + patrimonio_ativos
 
-    # Alimentação da matriz com a nova coluna tratada como string
+    # Alimentação da matriz de auditoria
     data.append({
         "Mês": m,
         "Usinas": usinas_ativas,
