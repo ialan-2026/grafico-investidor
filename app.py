@@ -106,7 +106,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // 10-YEAR FIXED HORIZON</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.1 // 10-YEAR HORIZON TUNING</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -141,8 +141,8 @@ st.sidebar.metric(
     delta="Garantido no Repasse"
 )
 
-# 🚀 ALTERAÇÃO CRÍTICA: Removido o Slider de Meses e fixado o horizonte em 10 anos (120 meses)
-months_projection = 120
+# 🚀 RESTAURADO COM TRAVA: O Slider voltou para a tela, mas agora limitado rigorosamente de 12 até 120 meses!
+months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 120, step=12)
 
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
@@ -173,7 +173,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 5. MOTOR DE CÁLCULO CORE REVISADO (100% PREVISÍVEL E TRAVADO EM 120 MESES)
+# 5. MOTOR DE CÁLCULO CORE REVISADO (DINÂMICO ATÉ O LIMITE DO SLIDER FIXADO)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -216,7 +216,7 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # MATEMÁTICA PURA LINEAR E PREVISÍVEL 
+    # MATEMÁTICA OPERACIONAL PURA LINEAR E PREVISÍVEL 
     faturamento_bruto_visivel = usinas_ativas * faturamento_por_usina
     custo_parcelas = parcelas_ativas_no_mes * custo_parcela_banco
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
@@ -258,7 +258,7 @@ for m in range(1, months_projection + 1):
 df = pd.DataFrame(data)
 retorno_solar_total = df["Valor Total Negócio"].iloc[-1]
 
-# CÁLCULO DE ROI DO PAINEL 3 REALISTA EM 10 ANOS FIXOS
+# CÁLCULO DE ROI DO PAINEL 3 REALISTA EM ANOS DINÂMICOS CONFORME O SLIDER
 anos_totais = months_projection / 12.0
 taxa_cdi_anual = 0.095
 retorno_cdi_final = aporte_inicial * ((1 + taxa_cdi_anual) ** anos_totais)
