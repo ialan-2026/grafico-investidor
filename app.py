@@ -149,23 +149,23 @@ st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top:
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 st.sidebar.markdown(f"<div style='color: #e11d48; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(custo_parcela_banco)}</b></div>", unsafe_allow_html=True)
 
-# 🚀 NOVO INPUT COMPLEMENTAR: Seletor Homologado de Bandeiras Tarifárias da ANEEL
+# Seletor Dinâmico de Bandeiras Tarifárias da ANEEL
 st.sidebar.markdown("---")
 bandeira_aneel = st.sidebar.selectbox(
     "Bandeira Tarifária Ativa (ANEEL)",
     ["Verde (Tarifa Normal)", "Amarela (+ Extra)", "Vermelha P1 (Escassez)", "Vermelha P2 (Crise Máxima)"]
 )
 
-# Mapeamento do acréscimo real no valor do faturamento/crédito injetado
+# Mapeamento do acréscimo real no valor do faturamento
 impacto_bandeira = {
     "Verde (Tarifa Normal)": 1.00,
-    "Amarela (+ Extra)": 1.05,       # +5% de valorização da energia
-    "Vermelha P1 (Escassez)": 1.12,  # +12% de valorização da energia
-    "Vermelha P2 (Crise Máxima)": 1.20 # +20% de valorização da energia
+    "Amarela (+ Extra)": 1.05,       
+    "Vermelha P1 (Escassez)": 1.12,  
+    "Vermelha P2 (Crise Máxima)": 1.20 
 }
 fator_bandeira = impacto_bandeira[bandeira_aneel]
 
-# Cálculo dinâmico da taxa reativa base com a bandeira aplicada
+# Cálculo dinâmico da taxa base reativa com a bandeira aplicada
 faturamento_com_bandeira = faturamento_por_usina * fator_bandeira
 taxa_base_calculada = (faturamento_com_bandeira / aporte_inicial) * 100 if aporte_inicial > 0 else 0
 
@@ -186,7 +186,7 @@ estrategia_caixa = st.sidebar.radio(
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
-# Mapeamento do ritmo com a Chave de Seleção (Toggle)
+# Mapeamento do ritmo de expansão
 expandir_usinas = True
 if "Conservador" in perfil:
     meses_para_nova_usina = 12
@@ -205,7 +205,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 6. MOTOR DE CÁLCULO CORE REVISADO (Com peso multiplicador da ANEEL)
+# 6. MOTOR DE CÁLCULO CORE REVISADO (Matemática corrigida e limpa)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -213,7 +213,7 @@ usinas_ativas = 1
 financiamentos = {}
 id_usina_atual = 1
 
-# Normalização defensiva
+# Normalização de segurança das variáveis numéricas
 val_faturamento = max(0.0, float(faturamento_por_usina))
 val_aporte = max(1.0, float(aporte_inicial))
 val_parcela = max(0.0, float(custo_parcela_banco))
@@ -253,9 +253,8 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # 🚀 MATEMÁTICA FINANCEIRA INDEXADA À BANDEIRA DA OUTORGA
-    faturamento_reajustado_local = val_faturamento * falar_fator = fator_bandeira
-    faturamento_bruto_visivel = usinas_ativas * (val_faturamento * falar_fator)
+    # 🔥 CORREÇÃO: Aplicação direta e limpa do fator da bandeira ANEEL selecionada
+    faturamento_bruto_visivel = usinas_ativas * (val_faturamento * fator_bandeira)
     custo_parcelas = parcelas_ativas_no_mes * val_parcela
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
