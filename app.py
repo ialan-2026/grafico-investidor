@@ -268,8 +268,6 @@ for m in range(1, months_projection + 1):
 
     # CONTABILIDADE OPERACIONAL DINÂMICA
     faturamento_bruto_visivel = usinas_ativas * faturamento_periodo_usina
-    
-    # 🚀 NOVO: Linha de base estática que simula o contrato SEM inflação (Fixo Puro)
     faturamento_estatico_sem_reajuste = usinas_ativas * (val_faturamento * fator_bandeira)
     
     custo_parcelas = parcelas_ativas_no_mes * val_parcela
@@ -300,7 +298,7 @@ for m in range(1, months_projection + 1):
         "Mês": m,
         "Usinas": usinas_ativas,
         "Faturamento Bruto": faturamento_bruto_visivel,
-        "Fat. Sem Reajuste": faturamento_estatico_sem_reajuste, # Injetado no DF
+        "Fat. Sem Reajuste": faturamento_estatico_sem_reajuste,
         "Parcelas Banco": custo_parcelas,
         "Lucro Líquido": lucro_liquido_empresa,
         "Rendimento Mensal (%)": f"{taxa_rendimento_mes:.2f}%",
@@ -355,12 +353,15 @@ with row2_col1:
 with row2_col2:
     st.markdown("""<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>""", unsafe_allow_html=True)
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Reajustado", line=dict(color="#FBBF24", width=2)))
     
-    # 🚀 TRACE INJETADO: Desenha a linha de base cinza e tracejada comparando o contrato sem reajuste
+    # 🚀 AJUSTE DE ESPESSURA: Linha amarela passa para width=4 (fica mais grossa ao fundo)
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Reajustado", line=dict(color="#FBBF24", width=4)))
+    
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Fat. Sem Reajuste"], name="Fat. Sem Reajuste", line=dict(color="#4b5563", width=1.5, dash='dash')))
     
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.03)'))
+    # 🚀 AJUSTE DE ESPESSURA: Linha roxa passa para width=2 (sobrepõe-se de forma centralizada)
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.01)'))
+    
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Saque Mensal"], name="Seu Saque", line=dict(color="#F43F5E", width=1.5, dash='dash')))
     fig2.update_layout(**layout_charts, height=260)
     st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
