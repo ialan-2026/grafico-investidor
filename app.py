@@ -119,7 +119,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.6 // VALUATION & INDEXATION PREDICTIVE SYSTEM</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.7 // FULL DYNAMIC ENGINE</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -179,13 +179,17 @@ st.sidebar.metric(
 )
 
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 120, step=12)
-pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
-# Seletor de Estratégia Reativa
+# Configuração de Porcentagens Dinâmicas
+pct_saque_int = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5)
+pct_retirada = pct_saque_int / 100.0
+pct_retencao_int = 100 - pct_saque_int
+
+# Seletor de Estratégia Reativa com Título Dinâmico
 st.sidebar.markdown("---")
 st.sidebar.markdown("<h4 style='color:#cbd5e1; margin-bottom: 2px;'>🎯 Alocação do Caixa</h4>", unsafe_allow_html=True)
 estrategia_caixa = st.sidebar.radio(
-    "O que fazer com os 70% retidos?",
+    f"O que fazer com os {pct_retencao_int}% retidos?",
     ["Acumular em Caixa Vivo (CDI)", "Quitação Acelerada (Abater Bancos)"]
 )
 
@@ -326,13 +330,13 @@ layout_charts = dict(
     margin=dict(l=45, r=15, t=15, b=25), hovermode='x unified'
 )
 
-# --- RENDERIZAÇÃO DA LINHA 1 (MÉTRICAS DO TOPO) ---
+# --- 🚀 RENDERIZAÇÃO DA LINHA 1 COM TÍTULOS TOTALMENTE DINÂMICOS ---
 with st.container():
     col_m1, col_m2, col_m3 = st.columns(3)
     with col_m1:
-        render_metric_card("Caixa Livre na Empresa (70%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
+        render_metric_card(f"Caixa Livre na Empresa ({pct_retencao_int}%)", formato_real(df['Caixa Acumulado'].iloc[-1]), "neon-green")
     with col_m2:
-        render_metric_card("Dinheiro Sacado para o Bolso (30%)", formato_real(total_sacado_investidor), "neon-blue")
+        render_metric_card(f"Dinheiro Sacado para o Bolso ({pct_saque_int}%)", formato_real(total_sacado_investidor), "neon-blue")
     with col_m3:
         render_metric_card("Valor Total da Holding (Usinas + Caixa)", formato_real(retorno_solar_total), "neon-purple")
 
@@ -353,15 +357,9 @@ with row2_col1:
 with row2_col2:
     st.markdown("""<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>""", unsafe_allow_html=True)
     fig2 = go.Figure()
-    
-    # 🚀 AJUSTE DE ESPESSURA: Linha amarela passa para width=4 (fica mais grossa ao fundo)
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Reajustado", line=dict(color="#FBBF24", width=4)))
-    
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Fat. Sem Reajuste"], name="Fat. Sem Reajuste", line=dict(color="#4b5563", width=1.5, dash='dash')))
-    
-    # 🚀 AJUSTE DE ESPESSURA: Linha roxa passa para width=2 (sobrepõe-se de forma centralizada)
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.01)'))
-    
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Saque Mensal"], name="Seu Saque", line=dict(color="#F43F5E", width=1.5, dash='dash')))
     fig2.update_layout(**layout_charts, height=260)
     st.plotly_chart(fig2, use_container_width=True, config={'displayModeBar': False})
