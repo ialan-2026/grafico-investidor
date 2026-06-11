@@ -119,7 +119,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.5 // TARIFF INDEXATION ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.5 // ANEEL TARIFF SHIELD ENGINE</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -149,21 +149,33 @@ st.sidebar.markdown(f"<div style='color: #10b981; font-size: 0.8rem; margin-top:
 custo_parcela_banco = st.sidebar.number_input("Parcela do Financiamento Solar (R$)", value=5000, step=500)
 st.sidebar.markdown(f"<div style='color: #e11d48; font-size: 0.8rem; margin-top: -12px; margin-bottom: 12px;'>➔ Validação: <b>{formato_real(custo_parcela_banco)}</b></div>", unsafe_allow_html=True)
 
-# Cálculo dinâmico da taxa reativa base inicial
-taxa_base_calculada = (faturamento_por_usina / aporte_inicial) * 100 if aporte_inicial > 0 else 0
-
+# 🚀 NOVO INPUT COMPLEMENTAR: Seletor Homologado de Bandeiras Tarifárias da ANEEL
 st.sidebar.markdown("---")
+bandeira_aneel = st.sidebar.selectbox(
+    "Bandeira Tarifária Ativa (ANEEL)",
+    ["Verde (Tarifa Normal)", "Amarela (+ Extra)", "Vermelha P1 (Escassez)", "Vermelha P2 (Crise Máxima)"]
+)
+
+# Mapeamento do acréscimo real no valor do faturamento/crédito injetado
+impacto_bandeira = {
+    "Verde (Tarifa Normal)": 1.00,
+    "Amarela (+ Extra)": 1.05,       # +5% de valorização da energia
+    "Vermelha P1 (Escassez)": 1.12,  # +12% de valorização da energia
+    "Vermelha P2 (Crise Máxima)": 1.20 # +20% de valorização da energia
+}
+fator_bandeira = impacto_bandeira[bandeira_aneel]
+
+# Cálculo dinâmico da taxa reativa base com a bandeira aplicada
+faturamento_com_bandeira = faturamento_por_usina * fator_bandeira
+taxa_base_calculada = (faturamento_com_bandeira / aporte_inicial) * 100 if aporte_inicial > 0 else 0
+
 st.sidebar.metric(
-    label="📈 Rendimento Base Inicial", 
+    label="📈 Rendimento Base Atualizado", 
     value=f"{taxa_base_calculada:.2f}% ao mês", 
-    delta="Garantido no Mês 1"
+    delta=f"Impacto {bandeira_aneel.split(' ')[0]}"
 )
 
 months_projection = st.sidebar.slider("Prazo da Projeção (Meses)", 12, 120, 120, step=12)
-
-# 🚀 NOVO INPUT: Slider para definir a taxa de reajuste anual publicada/IPCA
-reajuste_anual_pct = st.sidebar.slider("Reajuste Anual da Tarifa / IPCA (%)", 0.0, 15.0, 5.0, step=0.5) / 100.0
-
 pct_retirada = st.sidebar.slider("% de Retirada do Lucro Líquido (Bolso)", 0, 100, 30, step=5) / 100.0
 
 # Seletor de Estratégia Reativa
@@ -184,7 +196,6 @@ elif "Agressivo" in perfil:
     max_usinas = 999
 else:
     st.sidebar.markdown("---")
-    # Garantido o nome correto sem o caractere "c"
     ativar_expansao = st.sidebar.toggle("Ativar Novas Expansões", value=True)
     if ativar_expansao:
         meses_para_nova_usina = st.sidebar.slider("Frequência de Nova Usina (A cada X meses)", 1, 24, 6)
@@ -194,7 +205,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 6. MOTOR DE CÁLCULO CORE COM INDEXAÇÃO ANUAL DINÂMICA
+# 6. MOTOR DE CÁLCULO CORE REVISADO (Com peso multiplicador da ANEEL)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -202,19 +213,12 @@ usinas_ativas = 1
 financiamentos = {}
 id_usina_atual = 1
 
-# Normalização de segurança das variáveis numéricas
-val_faturamento_inicial = max(0.0, float(faturamento_por_usina))
+# Normalização defensiva
+val_faturamento = max(0.0, float(faturamento_por_usina))
 val_aporte = max(1.0, float(aporte_inicial))
 val_parcela = max(0.0, float(custo_parcela_banco))
 
-# Variável que vai sofrer a mutação acumulada ano a ano
-faturamento_corrente_usina = val_faturamento_inicial
-
 for m in range(1, months_projection + 1):
-    
-    # 🚀 GATILHO DE REAJUSTE ANUAL: A cada 12 meses completados, inflaciona a tarifa conforme o slider
-    if m > 1 and (m - 1) % 12 == 0:
-        faturamento_corrente_usina *= (1 + reajuste_anual_pct)
     
     # Gatilho condicional de expansão patrimonial
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
@@ -249,8 +253,9 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # MATEMÁTICA OPERACIONAL ATUALIZADA COM O REAJUSTE DA ENERGIA
-    faturamento_bruto_visivel = usinas_ativas * faturamento_corrente_usina
+    # 🚀 MATEMÁTICA FINANCEIRA INDEXADA À BANDEIRA DA OUTORGA
+    faturamento_reajustado_local = val_faturamento * falar_fator = fator_bandeira
+    faturamento_bruto_visivel = usinas_ativas * (val_faturamento * falar_fator)
     custo_parcelas = parcelas_ativas_no_mes * val_parcela
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
@@ -260,7 +265,7 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # CÁLCULO DA TAXA DE RENDIMENTO DINÂMICA (Acompanha o crescimento da tarifa)
+    # CÁLCULO DA TAXA DE RENDIMENTO REAL ESTÁVEL POR CONTRATO
     capital_proporcional = usinas_ativas * val_aporte
     taxa_rendimento_mes = (lucro_liquido_empresa / capital_proporcional) * 100 if capital_proporcional > 0 else 0
 
@@ -328,7 +333,6 @@ with row2_col1:
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Caixa Acumulado"], name="Dinheiro Vivo", line=dict(color="#3B82F6", width=2, dash='dot')))
     fig1.add_trace(go.Scatter(x=df["Mês"], y=df["Valor Total Negócio"], name="Valor da Holding", line=dict(color="#FF9F43", width=3)))
     fig1.update_layout(**layout_charts, height=260)
-    st.sidebar.markdown("---") # Preserva espaçamento lateral limpo
     st.plotly_chart(fig1, use_container_width=True, config={'displayModeBar': False})
 
 with row2_col2:
