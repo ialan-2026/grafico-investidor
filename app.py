@@ -119,7 +119,7 @@ st.markdown("""
 fuso_brasil = timezone(timedelta(hours=-3))
 st.markdown("""
     <div class="command-bar">
-        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.5 // ANEEL TARIFF SHIELD ENGINE</div>
+        <div>❖ SANTO HOUSE SOLAR TERMINAL v4.6 // VALUATION & INDEXATION PREDICTIVE SYSTEM</div>
         <div>SYS TIME: <b>{}</b></div>
         <div style="color: #10b981; font-weight: bold; letter-spacing: 1px;">● CORE SYSTEM ONLINE</div>
     </div>
@@ -156,7 +156,10 @@ bandeira_aneel = st.sidebar.selectbox(
     ["Verde (Tarifa Normal)", "Amarela (+ Extra)", "Vermelha P1 (Escassez)", "Vermelha P2 (Crise Máxima)"]
 )
 
-# Mapeamento do acréscimo real no valor do faturamento
+# 🚀 RETORNADO: Slider para definir a taxa de reajuste inflacionário anual homologado da energia
+reajuste_anual_pct = st.sidebar.slider("Reajuste Anual da Energia / IPCA (%)", 0.0, 15.0, 5.0, step=0.5) / 100.0
+
+# Mapeamento do acréscimo real no valor do faturamento por bandeira
 impacto_bandeira = {
     "Verde (Tarifa Normal)": 1.00,
     "Amarela (+ Extra)": 1.05,       
@@ -205,7 +208,7 @@ else:
         meses_para_nova_usina = 999
         max_usinas = 1
 
-# 6. MOTOR DE CÁLCULO CORE REVISADO (Matemática corrigida e limpa)
+# 6. MOTOR DE CÁLCULO CORE REVISADO (UNIFICANDO REAJUSTE ANUAL + BANDEIRAS)
 data = []
 caixa_acumulado = 0.0
 total_sacado_investidor = 0.0
@@ -214,12 +217,22 @@ financiamentos = {}
 id_usina_atual = 1
 
 # Normalização de segurança das variáveis numéricas
-val_faturamento = max(0.0, float(faturamento_por_usina))
+val_faturamento_inicial = max(0.0, float(faturamento_por_usina))
 val_aporte = max(1.0, float(aporte_inicial))
 val_parcela = max(0.0, float(custo_parcela_banco))
 
+# Base dinâmica que vai acumular a inflação ano a ano
+faturamento_base_acumulado = val_faturamento_inicial
+
 for m in range(1, months_projection + 1):
     
+    # 🚀 MOTOR DE VALORIZAÇÃO ANUAL: A cada 12 meses, aplica a taxa do slider cumulativamente
+    if m > 1 and (m - 1) % 12 == 0:
+        faturamento_base_acumulado *= (1 + reajuste_anual_pct)
+        
+    # Aplica o fator de bandeira atualizado sobre o valor corrigido do período
+    faturamento_periodo_usina = faturamento_base_acumulado * fator_bandeira
+
     # Gatilho condicional de expansão patrimonial
     if expandir_usinas and m > 1 and m <= 60 and (m - 1) % meses_para_nova_usina == 0:
         if usinas_ativas < max_usinas:
@@ -253,8 +266,8 @@ for m in range(1, months_projection + 1):
             else:
                 parcelas_ativas_no_mes += 1
 
-    # 🔥 CORREÇÃO: Aplicação direta e limpa do fator da bandeira ANEEL selecionada
-    faturamento_bruto_visivel = usinas_ativas * (val_faturamento * fator_bandeira)
+    # CONTABILIDADE OPERACIONAL DINÂMICA
+    faturamento_bruto_visivel = usinas_ativas * faturamento_periodo_usina
     custo_parcelas = parcelas_ativas_no_mes * val_parcela
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
@@ -264,7 +277,7 @@ for m in range(1, months_projection + 1):
     caixa_acumulado += retencao_caixa
     total_sacado_investidor += saque_investidor
 
-    # CÁLCULO DA TAXA DE RENDIMENTO REAL ESTÁVEL POR CONTRATO
+    # CÁLCULO DA TAXA DE RENDIMENTO REAL CRESCENTE CONFORME A INFLAÇÃO TARIFFÁRIA
     capital_proporcional = usinas_ativas * val_aporte
     taxa_rendimento_mes = (lucro_liquido_empresa / capital_proporcional) * 100 if capital_proporcional > 0 else 0
 
@@ -322,7 +335,7 @@ with st.container():
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 2: RENDIMENTOS GRÁFICOS ---
+# --- LINHA 2: RENDIMENTOS GRÁFICOS (AGORA REFLETINDO OS DEGRAUS DA VALORIZAÇÃO) ---
 row2_col1, row2_col2 = st.columns(2)
 
 with row2_col1:
@@ -370,9 +383,9 @@ with row3_col2:
     multiplicador = retorno_solar_total / (retorno_cdi_final if retorno_cdi_final > 0 else 1)
     st.markdown(f"""
         <div style="background-color: #131722; border: 1px solid #2a2e39; border-radius: 0 0 4px 4px; padding: 20px; height: 160px; font-size: 0.85rem; color: #cbd5e1; line-height: 1.5;">
-            Ao adotar a estratégia selecionada, o capital injetado se multiplica de forma geométrica através do efeito cascata. 
+            Ao adotar a estratégia selecionada, o capital injetado se multiplica de forma geométrica através do efeito caixa livre. 
             Enquanto as aplicações tradicionais prendem o investidor em uma linha reta corroída pela inflação, o modelo operacional 
-            solar entrega um retorno total estimado de <b style="color:#10b981;">{multiplicador:.1f}x maior que o CDI</b>, transformando receita operacional em patrimônio líquido consolidado.
+            solar entrega um retorno total estimado de <b style="color:#10b981;">{multiplicador:.1f}x maior que o CDI</b>, capitalizando a tarifa reajustada em patrimônio líquido consolidado.
         </div>
     """, unsafe_allow_html=True)
 
