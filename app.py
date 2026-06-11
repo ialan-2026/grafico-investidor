@@ -156,7 +156,7 @@ bandeira_aneel = st.sidebar.selectbox(
     ["Verde (Tarifa Normal)", "Amarela (+ Extra)", "Vermelha P1 (Escassez)", "Vermelha P2 (Crise Máxima)"]
 )
 
-# 🚀 RETORNADO: Slider para definir a taxa de reajuste inflacionário anual homologado da energia
+# Slider para definir a taxa de reajuste inflacionário anual homologado da energia
 reajuste_anual_pct = st.sidebar.slider("Reajuste Anual da Energia / IPCA (%)", 0.0, 15.0, 5.0, step=0.5) / 100.0
 
 # Mapeamento do acréscimo real no valor do faturamento por bandeira
@@ -217,16 +217,16 @@ financiamentos = {}
 id_usina_atual = 1
 
 # Normalização de segurança das variáveis numéricas
-val_faturamento_inicial = max(0.0, float(faturamento_por_usina))
+val_faturamento = max(0.0, float(faturamento_por_usina))
 val_aporte = max(1.0, float(aporte_inicial))
 val_parcela = max(0.0, float(custo_parcela_banco))
 
 # Base dinâmica que vai acumular a inflação ano a ano
-faturamento_base_acumulado = val_faturamento_inicial
+faturamento_base_acumulado = val_faturamento
 
 for m in range(1, months_projection + 1):
     
-    # 🚀 MOTOR DE VALORIZAÇÃO ANUAL: A cada 12 meses, aplica a taxa do slider cumulativamente
+    # MOTOR DE VALORIZAÇÃO ANUAL: A cada 12 meses, aplica a taxa do slider cumulativamente
     if m > 1 and (m - 1) % 12 == 0:
         faturamento_base_acumulado *= (1 + reajuste_anual_pct)
         
@@ -268,6 +268,10 @@ for m in range(1, months_projection + 1):
 
     # CONTABILIDADE OPERACIONAL DINÂMICA
     faturamento_bruto_visivel = usinas_ativas * faturamento_periodo_usina
+    
+    # 🚀 NOVO: Linha de base estática que simula o contrato SEM inflação (Fixo Puro)
+    faturamento_estatico_sem_reajuste = usinas_ativas * (val_faturamento * fator_bandeira)
+    
     custo_parcelas = parcelas_ativas_no_mes * val_parcela
     lucro_liquido_empresa = faturamento_bruto_visivel - custo_parcelas
     
@@ -296,6 +300,7 @@ for m in range(1, months_projection + 1):
         "Mês": m,
         "Usinas": usinas_ativas,
         "Faturamento Bruto": faturamento_bruto_visivel,
+        "Fat. Sem Reajuste": faturamento_estatico_sem_reajuste, # Injetado no DF
         "Parcelas Banco": custo_parcelas,
         "Lucro Líquido": lucro_liquido_empresa,
         "Rendimento Mensal (%)": f"{taxa_rendimento_mes:.2f}%",
@@ -335,7 +340,7 @@ with st.container():
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# --- LINHA 2: RENDIMENTOS GRÁFICOS (AGORA REFLETINDO OS DEGRAUS DA VALORIZAÇÃO) ---
+# --- LINHA 2: RENDIMENTOS GRÁFICOS ---
 row2_col1, row2_col2 = st.columns(2)
 
 with row2_col1:
@@ -350,7 +355,11 @@ with row2_col1:
 with row2_col2:
     st.markdown("""<div class="panel-title-bar">💸 PAINEL 2: FLUXO DE CAIXA MENSAL EM CASCATA</div>""", unsafe_allow_html=True)
     fig2 = go.Figure()
-    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Bruto", line=dict(color="#FBBF24", width=2)))
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Faturamento Bruto"], name="Fat. Reajustado", line=dict(color="#FBBF24", width=2)))
+    
+    # 🚀 TRACE INJETADO: Desenha a linha de base cinza e tracejada comparando o contrato sem reajuste
+    fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Fat. Sem Reajuste"], name="Fat. Sem Reajuste", line=dict(color="#4b5563", width=1.5, dash='dash')))
+    
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Lucro Líquido"], name="Lucro Líq.", line=dict(color="#A78BFA", width=2), fill='tozeroy', fillcolor='rgba(167, 139, 250, 0.03)'))
     fig2.add_trace(go.Scatter(x=df["Mês"], y=df["Saque Mensal"], name="Seu Saque", line=dict(color="#F43F5E", width=1.5, dash='dash')))
     fig2.update_layout(**layout_charts, height=260)
@@ -395,6 +404,7 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("""<div class="panel-title-bar">📋 TABELA DE AUDITORIA DO TERMINAL (MÊS A MÊS)</div>""", unsafe_allow_html=True)
 st.dataframe(df.style.format({
     "Faturamento Bruto": formato_real,
+    "Fat. Sem Reajuste": formato_real,
     "Parcelas Banco": formato_real,
     "Lucro Líquido": formato_real,
     "Saque Mensal": formato_real,
